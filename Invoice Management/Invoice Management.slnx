@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Invoice Management/Invoice Management.csproj" />
+  <Project Path="InvoiceManagement.Application/InvoiceManagement.Application.csproj" />
+  <Project Path="InvoiceManagement.Core/InvoiceManagement.Domain.csproj" />
+  <Project Path="InvoiceManagement.Infrastructure/InvoiceManagement.Infrastructure.csproj" />
+  <Project Path="InvoiceManagement.Tests/InvoiceManagement.Tests.csproj" />
+</Solution>
