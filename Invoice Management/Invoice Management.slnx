@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="Invoice Management/Invoice Management.csproj" Id="81183038-0cb3-42f1-8d8f-ed98a2b9d041" />
+  <Project Path="Invoice Management/InvoiceManagement.Web.csproj" Id="81183038-0cb3-42f1-8d8f-ed98a2b9d041" />
   <Project Path="InvoiceManagement.Application/InvoiceManagement.Application.csproj" />
   <Project Path="InvoiceManagement.Core/InvoiceManagement.Domain.csproj" />
   <Project Path="InvoiceManagement.Infrastructure/InvoiceManagement.Infrastructure.csproj" />
