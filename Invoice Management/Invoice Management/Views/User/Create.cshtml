@@ -1,0 +1,53 @@
+﻿@model Invoice_Management.Models.ViewModels.CreateUserViewModel
+
+@{
+    ViewBag.Title = "Create User";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-3">
+        <div class="card-header bg-dark text-white">
+            <h4>Create New User</h4>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter email" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label>Password</label>
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Enter password" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label>Select Role</label>
+                    @Html.DropDownListFor(m => m.SelectedRole, Model.Roles, "-- Select Role --", new { @class = "form-select" })
+                    @Html.ValidationMessageFor(m => m.SelectedRole, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label>First Name</label>
+                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                </div>
+
+                <div class="mb-3">
+                    <label>Last Name</label>
+                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Create User
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
