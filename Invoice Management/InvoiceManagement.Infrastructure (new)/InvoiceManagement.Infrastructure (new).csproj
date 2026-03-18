@@ -120,8 +120,8 @@
   <ItemGroup>
     <Compile Include="Identity\ApplicationRoleManager.cs" />
     <Compile Include="Identity\ApplicationSignInManager .cs" />
-    <Compile Include="Identity\ApplicationUser.cs" />
     <Compile Include="Identity\ApplicationUserManager .cs" />
+    <Compile Include="Identity\ApplicationUser.cs" />
     <Compile Include="Identity\RoleInitializer.cs" />
     <Compile Include="Identity\Roles.cs" />
     <Compile Include="Interface\IGenericRepository.cs" />

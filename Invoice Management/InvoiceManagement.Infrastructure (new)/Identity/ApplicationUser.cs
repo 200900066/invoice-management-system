@@ -4,10 +4,11 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace InvoiceManagement.Infrastructure.Identity
+namespace InvoiceManagement.Infrastructure__new_.Identity
 {
     public class ApplicationUser : IdentityUser
     {
+      
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => FirstName + " " + LastName;

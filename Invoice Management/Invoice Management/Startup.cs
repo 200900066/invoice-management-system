@@ -25,7 +25,7 @@ namespace Invoice_Management
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
                 LoginPath = new PathString("/Account/Login"),
-                ExpireTimeSpan = TimeSpan.FromMinutes(3),
+                ExpireTimeSpan = TimeSpan.FromMinutes(60),
 
                 Provider = new CookieAuthenticationProvider
                 {

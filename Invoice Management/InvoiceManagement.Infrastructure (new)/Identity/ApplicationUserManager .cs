@@ -1,5 +1,4 @@
-﻿using InvoiceManagement.Infrastructure.Identity;
-using InvoiceManagement.Infrastructure.Persistance;
+﻿using InvoiceManagement.Infrastructure.Persistance;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;

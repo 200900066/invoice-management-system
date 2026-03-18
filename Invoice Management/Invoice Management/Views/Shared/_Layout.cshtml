@@ -15,6 +15,10 @@
 
         return (controller == currentController && action == currentAction) ? "active" : "";
     }
+
+    public bool IsUser() => User.IsInRole("User");
+    public bool IsAdmin() => User.IsInRole("Admin");
+    public bool IsManager() => User.IsInRole("Manager");
 }
 
 <!DOCTYPE html>
@@ -28,12 +32,20 @@
     @Scripts.Render("~/bundles/modernizr")
 
     <style>
-        /* Optional: make active tab visible */
         .navbar .nav-link.active {
             font-weight: bold;
             color: #fff !important;
             border-bottom: 2px solid #fff;
         }
+
+        .navbar-brand {
+            font-weight: 500;
+            opacity: 0.85;
+        }
+
+            .navbar-brand:hover {
+                opacity: 1;
+            }
     </style>
 </head>
 <body>
@@ -54,7 +66,8 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                        if (User.IsInRole("User") || User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        <!-- Invoices (ALL roles) -->
+                        if (IsUser() || IsAdmin() || IsManager())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Invoices", "Index", "Invoice", null,
@@ -62,7 +75,8 @@
                             </li>
                         }
 
-                        if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        <!-- Products (ALL roles as per your requirement) -->
+                        if (IsUser() || IsAdmin() || IsManager())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Products", "Index", "Product", null,
@@ -70,7 +84,8 @@
                             </li>
                         }
 
-                        if (User.IsInRole("Admin"))
+                        <!-- Users (ADMIN ONLY) -->
+                        if (IsAdmin())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Users", "Index", "User", null,
@@ -78,7 +93,8 @@
                             </li>
                         }
 
-                        if (User.IsInRole("Manager"))
+                        <!-- Reports (MANAGER ONLY) -->
+                        if (IsManager())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Reports", "Index", "Reports", null,
@@ -93,8 +109,7 @@
 
                     @{
                         var identity = (ClaimsIdentity)User.Identity;
-                        var firstName = identity.FindFirst("FirstName")?.Value;
-                        var lastName = identity.FindFirst("LastName")?.Value;
+                        var lastName = identity.FindFirst("LastName")?.Value ?? "";
                     }
 
                     @if (User.Identity.IsAuthenticated)

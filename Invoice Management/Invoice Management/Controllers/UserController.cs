@@ -1,5 +1,4 @@
 ﻿using Invoice_Management.Models.ViewModels;
-using InvoiceManagement.Infrastructure.Identity;
 using InvoiceManagement.Infrastructure__new_.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using System;

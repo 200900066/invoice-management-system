@@ -1,4 +1,4 @@
-﻿using InvoiceManagement.Infrastructure.Identity;
+﻿using InvoiceManagement.Infrastructure__new_.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Data.Entity;
 

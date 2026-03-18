@@ -1,5 +1,4 @@
-﻿using InvoiceManagement.Infrastructure.Identity;
-using Microsoft.AspNet.Identity.Owin;
+﻿using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using System.Security.Claims;
