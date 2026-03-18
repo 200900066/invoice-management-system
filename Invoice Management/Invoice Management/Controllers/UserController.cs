@@ -10,7 +10,8 @@ using System.Web.Mvc;
 namespace Invoice_Management.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+    // [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     public class UserController : Controller
     {
         public UserController()
