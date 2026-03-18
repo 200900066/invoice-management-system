@@ -1,8 +1,10 @@
 ﻿using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure__new_.Identity;
+using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
+using Microsoft.Owin.Security.Cookies;
 using Owin;
-using static Invoice_Management.App_Start.IdentityConfig;
+using System;
 
 [assembly: OwinStartup(typeof(Invoice_Management.Startup))]
 namespace Invoice_Management
@@ -17,6 +19,14 @@ namespace Invoice_Management
             app.CreatePerOwinContext(ApplicationDbContext.Create);
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
+            app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
+
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+                LoginPath = new PathString("/Account/Login"),
+                ExpireTimeSpan = TimeSpan.FromMinutes(60),
+            });
         }
 
         public void ConfigureAuth(IAppBuilder app)
