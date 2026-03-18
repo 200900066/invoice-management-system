@@ -1,0 +1,18 @@
+﻿@model Invoice_Management.Models.ViewModels.UserListViewModel
+
+@{
+    ViewBag.Title = "User Details";
+}
+
+<h2>User Details</h2>
+
+<div>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Name:</strong> @Model.FullName</p>
+    <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+    <p><strong>Roles:</strong> @string.Join(", ", Model.Roles)</p>
+</div>
+
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>
