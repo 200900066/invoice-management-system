@@ -10,6 +10,8 @@ using System.Web.Mvc;
 
 namespace Invoice_Management.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         public UserController()
@@ -17,12 +19,13 @@ namespace Invoice_Management.Controllers
         }
 
         public ActionResult Index()
-        
         {
-            return View();
+            var userManager = HttpContext.GetOwinContext().Get<ApplicationUserManager>();
+            var users = userManager.Users.ToList();
+            return View(users);
         }
 
-        // GET: Create User
+
         public ActionResult Create()
         {
             var roleManager = HttpContext.GetOwinContext().Get<ApplicationRoleManager>();
@@ -62,7 +65,8 @@ namespace Invoice_Management.Controllers
                 UserName = model.Email,
                 Email = model.Email,
                 FirstName = model.FirstName,
-                LastName = model.LastName     
+                LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber
             };
 
             var userManager = HttpContext .GetOwinContext().Get<ApplicationUserManager>();

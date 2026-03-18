@@ -28,6 +28,19 @@
                 </div>
 
                 <div class="mb-3">
+                    @Html.LabelFor(m => m.PhoneNumber)
+
+                    @Html.TextBoxFor(m => m.PhoneNumber, new
+                    {
+                        @class = "form-control",
+                        placeholder = "Enter phone number",
+                        type = "tel"
+                    })
+
+                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
                     <label>Select Role</label>
                     @Html.DropDownListFor(m => m.SelectedRole, Model.Roles, "-- Select Role --", new { @class = "form-select" })
                     @Html.ValidationMessageFor(m => m.SelectedRole, "", new { @class = "text-danger" })

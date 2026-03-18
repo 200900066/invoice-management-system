@@ -8,6 +8,7 @@ using System.Web.Mvc;
 
 namespace Invoice_Management.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         public AccountController()
@@ -39,7 +40,17 @@ namespace Invoice_Management.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
+
+                    var userManager = HttpContext.GetOwinContext().Get<ApplicationUserManager>();
+                    var user = await userManager.FindByEmailAsync(model.Email);
+
+                    if (await userManager.IsInRoleAsync(user.Id, "Admin"))
+                        return RedirectToAction("Index", "User");
+
+                    if (await userManager.IsInRoleAsync(user.Id, "Manager"))
+                        return RedirectToAction("Dashboard", "Reports");
+
+                    return RedirectToAction("Index", "Invoice");
 
                 case SignInStatus.LockedOut:
                     return View("Lockout");

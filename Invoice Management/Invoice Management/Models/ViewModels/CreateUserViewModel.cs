@@ -21,6 +21,8 @@ namespace Invoice_Management.Models.ViewModels
         [Required]
         public string LastName { get; set; }
 
+        public string PhoneNumber { get; set; }
+
         public List<SelectListItem> Roles { get; set; }
     }
 }

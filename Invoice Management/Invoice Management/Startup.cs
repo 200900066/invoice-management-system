@@ -25,7 +25,22 @@ namespace Invoice_Management
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
                 LoginPath = new PathString("/Account/Login"),
-                ExpireTimeSpan = TimeSpan.FromMinutes(60),
+                ExpireTimeSpan = TimeSpan.FromMinutes(3),
+
+                Provider = new CookieAuthenticationProvider
+                {
+                    OnApplyRedirect = ctx =>
+                    {
+                        if (!ctx.Request.User.Identity.IsAuthenticated)
+                        {
+                            ctx.Response.Redirect("/Account/Login");
+                        }
+                        else
+                        {
+                            ctx.Response.Redirect("/Error/AccessDenied");
+                        }
+                    }
+                }
             });
         }
 
