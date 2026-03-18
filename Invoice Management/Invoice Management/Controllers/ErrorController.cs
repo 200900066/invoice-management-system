@@ -6,10 +6,9 @@ using System.Web.Mvc;
 
 namespace Invoice_Management.Controllers
 {
-    [Authorize]
-    public class HomeController : Controller
+    public class ErrorController : Controller
     {
-        public ActionResult Index()
+        public ActionResult AccessDenied()
         {
             return View();
         }

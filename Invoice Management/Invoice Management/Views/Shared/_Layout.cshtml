@@ -1,39 +1,164 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+@functions {
+    public string IsActive(string controller, string action = null)
+    {
+        var routeData = ViewContext.RouteData;
+
+        var currentController = routeData.Values["controller"].ToString();
+        var currentAction = routeData.Values["action"].ToString();
+
+        if (action == null)
+        {
+            return controller == currentController ? "active" : "";
+        }
+
+        return (controller == currentController && action == currentAction) ? "active" : "";
+    }
+
+    public bool IsUser() => User.IsInRole("User");
+    public bool IsAdmin() => User.IsInRole("Admin");
+    public bool IsManager() => User.IsInRole("Manager");
+}
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title - Invoice System</title>
+
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        .navbar .nav-link.active {
+            font-weight: bold;
+            color: #fff !important;
+            border-bottom: 2px solid #fff;
+        }
+
+        .navbar-brand {
+            font-weight: 500;
+            opacity: 0.85;
+        }
+
+            .navbar-brand:hover {
+                opacity: 1;
+            }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
         <div class="container">
-            @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+            @Html.ActionLink("Invoice System", "Index", "Home", null, new { @class = "navbar-brand" })
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+
+            <div class="collapse navbar-collapse d-sm-inline-flex">
+
+                <!-- LEFT MENU -->
+                <ul class="navbar-nav">
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Invoices (ALL roles) -->
+                        if (IsUser() || IsAdmin() || IsManager())
+                        {
+                            <li class="nav-item">
+                                @Html.ActionLink("Invoices", "Index", "Invoice", null,
+                                    new { @class = "nav-link " + IsActive("Invoice") })
+                            </li>
+                        }
+
+                        <!-- Products (ALL roles as per your requirement) -->
+                        if (IsUser() || IsAdmin() || IsManager())
+                        {
+                            <li class="nav-item">
+                                @Html.ActionLink("Products", "Index", "Product", null,
+                                    new { @class = "nav-link " + IsActive("Product") })
+                            </li>
+                        }
+
+                        <!-- Users (ADMIN ONLY) -->
+                        if (IsAdmin())
+                        {
+                            <li class="nav-item">
+                                @Html.ActionLink("Users", "Index", "User", null,
+                                    new { @class = "nav-link " + IsActive("User") })
+                            </li>
+                        }
+
+                        <!-- Reports (MANAGER ONLY) -->
+                        if (IsManager())
+                        {
+                            <li class="nav-item">
+                                @Html.ActionLink("Reports", "Index", "Reports", null,
+                                    new { @class = "nav-link " + IsActive("Reports") })
+                            </li>
+                        }
+                    }
                 </ul>
+
+                <!-- RIGHT MENU -->
+                <ul class="navbar-nav ms-auto align-items-center">
+
+                    @{
+                        var identity = (ClaimsIdentity)User.Identity;
+                        var lastName = identity.FindFirst("LastName")?.Value ?? "";
+                    }
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item me-3">
+                            <span class="nav-link mb-0">
+                                Hello @lastName
+                            </span>
+                        </li>
+
+                        <li class="nav-item">
+                            @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { @class = "d-inline" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="nav-link btn btn-link p-0 m-0 align-baseline">
+                                    Logout
+                                </button>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("Login", "Login", "Account", null, new { @class = "nav-link" })
+                        </li>
+                    }
+
+                </ul>
+
             </div>
         </div>
     </nav>
+
+    <!-- BODY CONTENT -->
     <div class="container body-content">
         @RenderBody()
+
         <hr />
+
+        <!-- FOOTER -->
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <p>&copy; @DateTime.Now.Year - Invoice System</p>
         </footer>
     </div>
 
+    <!-- SCRIPTS -->
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
 </body>
 </html>
