@@ -1,6 +1,8 @@
-﻿using InvoiceManagement.Application.Interface;
+﻿using Invoice_Management.Models.ViewModels;
+using InvoiceManagement.Application.Interface;
 using InvoiceManagement.Domain.Entities;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -20,7 +22,16 @@ namespace Invoice_Management.Controllers
         public async Task<ActionResult> Index()
         {
             var products = await _productService.GetAllAsync();
-            return View(products);
+
+            var vm = products.Select(p => new ProductListViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CostPerItem = p.CostPerItem,
+                QuantityInStock = p.QuantityInStock
+            });
+
+            return View(vm);
         }
 
         public async Task<ActionResult> Details(int id)
@@ -28,7 +39,16 @@ namespace Invoice_Management.Controllers
             try
             {
                 var product = await _productService.GetByIdAsync(id);
-                return View(product);
+
+                var vm = new ProductDetailsViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    CostPerItem = product.CostPerItem,
+                    QuantityInStock = product.QuantityInStock
+                };
+
+                return View(vm);
             }
             catch (Exception)
             {
@@ -43,21 +63,21 @@ namespace Invoice_Management.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(Product product)
+        public async Task<ActionResult> Create(CreateProductViewModel vm)
         {
-            if (!ModelState.IsValid)
-                return View(product);
+            if (!ModelState.IsValid) return View(vm);
 
-            try
+            var product = new Product
             {
-                await _productService.CreateAsync(product);
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                return View(product);
-            }
+                Id = 0,
+                Name = vm.Name,
+                CostPerItem = vm.CostPerItem,
+                QuantityInStock = vm.QuantityInStock
+            };
+
+            await _productService.CreateAsync(product);
+
+            return RedirectToAction("Index");
         }
 
         public async Task<ActionResult> Edit(int id)
@@ -65,7 +85,15 @@ namespace Invoice_Management.Controllers
             try
             {
                 var product = await _productService.GetByIdAsync(id);
-                return View(product);
+
+                var vm = new EditProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    CostPerItem = product.CostPerItem,
+                    QuantityInStock = product.QuantityInStock
+                };
+                return View(vm);
             }
             catch (Exception)
             {
@@ -75,21 +103,29 @@ namespace Invoice_Management.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(Product product)
+        public async Task<ActionResult> Edit(EditProductViewModel productVm)
         {
-            if (!ModelState.IsValid)
-                return View(product);
+            if (!ModelState.IsValid) return View(productVm);
 
             try
             {
+                var product = new Product
+                {
+                    Id = productVm.Id,
+                    Name = productVm.Name,
+                    CostPerItem = productVm.CostPerItem,
+                    QuantityInStock = productVm.QuantityInStock
+                };
                 await _productService.UpdateAsync(product);
-                return RedirectToAction("Index");
+
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(product);
+                return View(productVm);
             }
+
+            return RedirectToAction("Index");
         }
 
         public async Task<ActionResult> Delete(int id)
@@ -97,7 +133,16 @@ namespace Invoice_Management.Controllers
             try
             {
                 var product = await _productService.GetByIdAsync(id);
-                return View(product);
+
+                var vm = new EditProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    CostPerItem = product.CostPerItem,
+                    QuantityInStock = product.QuantityInStock
+                };
+
+                return View(vm);
             }
             catch (Exception)
             {
@@ -119,6 +164,5 @@ namespace Invoice_Management.Controllers
                 return View();
             }
         }
-
     }
 }
