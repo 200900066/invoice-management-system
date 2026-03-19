@@ -9,8 +9,8 @@ namespace InvoiceManagement.Application.Interface
     {
         Task CreateAsync(Product product);
         Task<IEnumerable<Product>> GetAllAsync();
-        Task<Product> GetByIdAsync(Guid id);
+        Task<Product> GetByIdAsync(int id);
         Task UpdateAsync(Product product);
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(int id);
     }
 }

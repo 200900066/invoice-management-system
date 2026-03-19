@@ -112,6 +112,14 @@
     <Compile Include="Migrations\202603180039365_InitialIdentity.Designer.cs">
       <DependentUpon>202603180039365_InitialIdentity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603190830248_addedProduct.cs" />
+    <Compile Include="Migrations\202603190830248_addedProduct.Designer.cs">
+      <DependentUpon>202603190830248_addedProduct.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603190836536_addedInvoice.cs" />
+    <Compile Include="Migrations\202603190836536_addedInvoice.Designer.cs">
+      <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistance\ApplicationDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -132,6 +140,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202603180039365_InitialIdentity.resx">
       <DependentUpon>202603180039365_InitialIdentity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603190830248_addedProduct.resx">
+      <DependentUpon>202603190830248_addedProduct.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603190836536_addedInvoice.resx">
+      <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

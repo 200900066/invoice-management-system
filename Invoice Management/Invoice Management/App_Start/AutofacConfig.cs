@@ -5,6 +5,7 @@ using InvoiceManagement.Application.Services;
 using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.UnitOfWork;
+using InvoiceManagement.Infrastructure.UnitOfWork.InvoiceManagement.Infrastructure.UnitOfWork;
 using System.Web.Mvc;
 
 namespace Invoice_Management.App_Start
@@ -15,19 +16,15 @@ namespace Invoice_Management.App_Start
         {
             var builder = new ContainerBuilder();
 
-            // Register controllers
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
 
-            // DbContext per request
             builder.RegisterType<ApplicationDbContext>()
                    .InstancePerRequest();
 
-            // Unit of Work
             builder.RegisterType<UnitOfWork>()
                    .As<IUnitOfWork>()
                    .InstancePerRequest();
 
-            // Services
             builder.RegisterType<ProductService>()
                    .As<IProductService>()
                    .InstancePerRequest();

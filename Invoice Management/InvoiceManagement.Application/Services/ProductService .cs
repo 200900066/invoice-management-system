@@ -7,51 +7,6 @@ using System.Threading.Tasks;
 
 namespace InvoiceManagement.Application.Services
 {
-    //public class ProductService : IProductService
-    //{
-    //    private readonly IUnitOfWork _unitOfWork;
-
-    //    public ProductService(IUnitOfWork unitOfWork)
-    //    {
-    //        _unitOfWork = unitOfWork;
-    //    }
-
-    //    public async Task CreateAsync(Product product)
-    //    {
-    //        if (product.CostPerItem <= 0)
-    //            throw new ArgumentException("Invalid price");
-
-    //        await _unitOfWork.Repository<Product>().AddAsync(product);
-    //        await _unitOfWork.SaveChangesAsync();
-    //    }
-
-    //    public async Task<IEnumerable<Product>> GetAllAsync()
-    //    {
-    //        return await _unitOfWork.Repository<Product>().GetAllAsync();
-    //    }
-
-    //    public async Task<Product> GetByIdAsync(Guid id)
-    //    {
-    //        var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
-
-    //        return product ?? throw new Exception("Product not found");
-    //    }
-
-    //    public async Task UpdateAsync(Product product)
-    //    {
-    //        await _unitOfWork.Repository<Product>().Update(product);
-    //        await _unitOfWork.SaveChangesAsync();
-    //    }
-
-    //    public async Task DeleteAsync(Guid id)
-    //    {
-    //        var repo = _unitOfWork.Repository<Product>();
-    //        var product = await repo.GetByIdAsync(id) ?? throw new Exception("Product not found");
-    //        repo.Delete(product);
-    //        await _unitOfWork.SaveChangesAsync();
-    //    }
-    //}
-
     public class ProductService : IProductService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -63,40 +18,75 @@ namespace InvoiceManagement.Application.Services
 
         public async Task CreateAsync(Product product)
         {
-            if (product.CostPerItem <= 0)
-                throw new ArgumentException("Invalid price");
+            try
+            {
+                if (product.CostPerItem <= 0)
+                    throw new ArgumentException("Invalid price");
 
-            await _unitOfWork.Products.AddAsync(product);
-            await _unitOfWork.SaveAsync();
+                await _unitOfWork.Repository<Product>().AddAsync(product);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error creating product", ex);
+            }
         }
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _unitOfWork.Products.GetAllAsync();
+            try
+            {
+                return await _unitOfWork.Repository<Product>().GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving products", ex);
+            }
         }
 
-        public async Task<Product> GetByIdAsync(Guid id)
+        public async Task<Product> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            try
+            {
+                var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
-            return product ?? throw new Exception("Product not found");
+                return product ?? throw new KeyNotFoundException("Product not found");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving product with id {id}", ex);
+            }
         }
 
         public async Task UpdateAsync(Product product)
         {
-            await _unitOfWork.Products.Update(product);
-            await _unitOfWork.SaveAsync();
+            try
+            {
+                await _unitOfWork.Repository<Product>().Update(product);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating product", ex);
+            }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id)
-                ?? throw new Exception("Product not found");
+            try
+            {
+                var repo = _unitOfWork.Repository<Product>();
 
-            _unitOfWork.Products.Delete(product);
-            await _unitOfWork.SaveAsync();
+                var product = await repo.GetByIdAsync(id)
+                    ?? throw new KeyNotFoundException("Product not found");
+
+                 repo.Delete(product);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting product", ex);
+            }
         }
     }
-
-
 }

@@ -8,7 +8,7 @@ namespace InvoiceManagement.Domain.Entities
 {
     public class Product
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public decimal CostPerItem { get; set; }
         public int QuantityInStock { get; set; }
