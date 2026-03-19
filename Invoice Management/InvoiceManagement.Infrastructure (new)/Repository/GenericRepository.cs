@@ -64,5 +64,24 @@ namespace InvoiceManagement.Infrastructure.Repository
         {
             _dbSet.Remove(entity);
         }
+
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate = null,Func<IQueryable<T>, IQueryable<T>> include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            // Apply include (ONLY if provided)
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            // Apply filter (ONLY if provided)
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            return await query.ToListAsync();
+        }
     }
 }
