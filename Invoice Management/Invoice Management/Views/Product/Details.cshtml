@@ -1,0 +1,18 @@
+﻿@model Invoice_Management.Models.ViewModels.ProductDetailsViewModel
+
+@{
+    ViewBag.Title = "Product Details";
+}
+
+<h2>Product Details</h2>
+
+<div>
+    <strong>Name:</strong> @Model.Name <br />
+    <strong>Price:</strong> @Model.CostPerItem <br />
+    <strong>Stock:</strong> @Model.QuantityInStock
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back", "Index")
+</p>

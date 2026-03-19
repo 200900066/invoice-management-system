@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace InvoiceManagement.Domain.Entities
+namespace Invoice_Management.Models.ViewModels
 {
-    public class Product
+    public class ProductListViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal CostPerItem { get; set; }
         public int QuantityInStock { get; set; }
-        public virtual ICollection<InvoiceItem> InvoiceItems { get; set; } = new List<InvoiceItem>();
     }
 }
