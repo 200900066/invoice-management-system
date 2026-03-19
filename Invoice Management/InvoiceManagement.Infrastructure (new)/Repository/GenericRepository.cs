@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace InvoiceManagement.Infrastructure.Repository
 {
-    public abstract class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context;
         protected readonly DbSet<T> _dbSet;

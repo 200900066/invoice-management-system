@@ -1,37 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using InvoiceManagement.Application.Interface;
+using InvoiceManagement.Application.Services;
+using InvoiceManagement.Infrastructure.Persistance;
+using InvoiceManagement.Infrastructure.UnitOfWork;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace Invoice_Management.Controllers
 {
     [Authorize]
+   [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
-        
-        [Authorize(Roles = "Admin,User,Manager")]
-        public ActionResult Index()
+        private readonly IProductService _productService;
+
+        public ProductController()
         {
-            return View();
+            var context = new ApplicationDbContext();
+            var unitOfWork = new UnitOfWork(context);
+            _productService = new ProductService(unitOfWork);
         }
 
-        [Authorize(Roles = "Admin")]
-        public ActionResult Create()
+        public async Task<ActionResult> Index()
         {
-            return View();
-        }
-
-        [Authorize(Roles = "Admin")]
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id)
-        {
-            return View();
+            var products = await _productService.GetAllAsync();
+            return View(products);
         }
     }
+
 }

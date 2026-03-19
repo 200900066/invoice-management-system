@@ -152,6 +152,12 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Mvc, Version=5.11.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Mvc.5.11.1\lib\net47\Unity.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebActivatorEx.2.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -180,6 +186,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ViewModels\CreateProductViewModel.cs" />
     <Compile Include="Models\ViewModels\CreateUserViewModel.cs" />
     <Compile Include="Models\ViewModels\EditUserViewModel.cs" />
     <Compile Include="Models\ViewModels\LoginViewModel.cs" />
@@ -281,8 +288,16 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\InvoiceManagement.Application\InvoiceManagement.Application.csproj">
+      <Project>{03D9DF01-CC47-4B19-6783-E80386E1D24D}</Project>
+      <Name>InvoiceManagement.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\InvoiceManagement.Core\InvoiceManagement.Domain.csproj">
+      <Project>{7BF711D2-FED0-1709-1F7F-95A1B349FA99}</Project>
+      <Name>InvoiceManagement.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\InvoiceManagement.Infrastructure %28new%29\InvoiceManagement.Infrastructure %28new%29.csproj">
-      <Project>{ca1fbea7-7114-4138-8985-2abd90d85b8c}</Project>
+      <Project>{CA1FBEA7-7114-4138-8985-2ABD90D85B8C}</Project>
       <Name>InvoiceManagement.Infrastructure %28new%29</Name>
     </ProjectReference>
   </ItemGroup>
