@@ -22,14 +22,6 @@ namespace Invoice_Management.Controllers
         {
         }
 
-        //public ActionResult Index()
-        //{
-        //    var userManager = HttpContext.GetOwinContext().Get<ApplicationUserManager>();
-        //    var users = userManager.Users.ToList();
-        //    return View(users);
-        //}
-
-
         public ActionResult Index()
         {
             var users = UserManager.Users.ToList();
@@ -45,7 +37,6 @@ namespace Invoice_Management.Controllers
 
             return View(model);
         }
-
 
         public ActionResult Create()
         {
@@ -63,7 +54,6 @@ namespace Invoice_Management.Controllers
             return View(model);
         }
 
-        // POST: Create User
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CreateUserViewModel model)
@@ -95,7 +85,6 @@ namespace Invoice_Management.Controllers
 
             if (result.Succeeded)
             {
-                //  ROLE ASSIGNMENT (THIS IS THE MAIN PART)
                 await userManager.AddToRoleAsync(user.Id, model.SelectedRole);
 
                 return RedirectToAction("Index");
@@ -136,8 +125,6 @@ namespace Invoice_Management.Controllers
             return View(model);
         }
 
-        // UPDATE (POST)
-        // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(EditUserViewModel model)
@@ -181,8 +168,6 @@ namespace Invoice_Management.Controllers
             return View(model);
         }
 
-        // DETAILS (OPTIONAL BUT GOOD PRACTICE)
-        // =========================
         public async Task<ActionResult> Details(string id)
         {
             if (id == null) return HttpNotFound();
@@ -202,9 +187,6 @@ namespace Invoice_Management.Controllers
             return View(model);
         }
 
-        // =========================
-        // DELETE (GET)
-        // =========================
         public async Task<ActionResult> Delete(string id)
         {
             if (id == null) return HttpNotFound();
@@ -223,9 +205,6 @@ namespace Invoice_Management.Controllers
             return View(model);
         }
 
-        // =========================
-        // DELETE (POST)
-        // =========================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(string id)

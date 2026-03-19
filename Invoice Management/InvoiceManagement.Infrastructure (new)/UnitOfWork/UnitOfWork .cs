@@ -2,10 +2,6 @@
 using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.Repository;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Data.Entity;
 using System.Threading.Tasks;
 
 namespace InvoiceManagement.Infrastructure.UnitOfWork
