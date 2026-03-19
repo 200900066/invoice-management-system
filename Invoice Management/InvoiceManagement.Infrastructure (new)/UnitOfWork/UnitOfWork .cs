@@ -25,7 +25,7 @@ namespace InvoiceManagement.Infrastructure.UnitOfWork
                 _context = context;
             }
 
-            // 🔹 Generic repository access
+            // Generic repository access
             public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
             {
                 var type = typeof(TEntity);
@@ -39,13 +39,13 @@ namespace InvoiceManagement.Infrastructure.UnitOfWork
                 return (IGenericRepository<TEntity>)_repositories[type];
             }
 
-            // 🔹 Save changes
+            // Save changes
             public async Task<int> SaveChangesAsync()
             {
                 return await _context.SaveChangesAsync();
             }
 
-            // 🔹 Transaction (EF6 style)
+            // Transaction (EF6 style)
             public void BeginTransaction()
             {
                 if (_transaction == null)

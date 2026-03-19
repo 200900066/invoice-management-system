@@ -120,6 +120,10 @@
     <Compile Include="Migrations\202603190836536_addedInvoice.Designer.cs">
       <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603191525509_FixModelChanges.cs" />
+    <Compile Include="Migrations\202603191525509_FixModelChanges.Designer.cs">
+      <DependentUpon>202603191525509_FixModelChanges.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistance\ApplicationDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -146,6 +150,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202603190836536_addedInvoice.resx">
       <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603191525509_FixModelChanges.resx">
+      <DependentUpon>202603191525509_FixModelChanges.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
