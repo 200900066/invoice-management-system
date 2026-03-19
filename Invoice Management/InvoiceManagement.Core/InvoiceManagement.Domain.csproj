@@ -4,4 +4,10 @@
 	  <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="InvoiceManagement.Infrastructure">
+      <HintPath>..\Invoice Management\Bin\InvoiceManagement.Infrastructure.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

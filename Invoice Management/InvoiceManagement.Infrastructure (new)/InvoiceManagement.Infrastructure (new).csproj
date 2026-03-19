@@ -134,6 +134,7 @@
     <Compile Include="Persistance\ApplicationDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\GenericRepository.cs" />
+    <Compile Include="Repository\ProductRepository.cs" />
     <Compile Include="UnitOfWork\UnitOfWork .cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,15 +1,16 @@
-﻿using System;
+﻿using InvoiceManagement.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace InvoiceManagement.Infrastructure.Interface
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork
     {
-        IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class;
+        IGenericRepository<Product> Products { get; }
 
-        Task BeginTransactionAsync();
-        Task CommitAsync();
-        Task RollbackAsync();
-        Task<int> SaveChangesAsync();
+        IGenericRepository<Invoice> Invoices { get; }
+
+        IGenericRepository<InvoiceItem> InvoiceItems { get; }
+
+        Task SaveAsync();
     }
 }
