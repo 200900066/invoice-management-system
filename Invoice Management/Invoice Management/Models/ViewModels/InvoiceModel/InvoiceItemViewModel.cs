@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Invoice_Management.Models.ViewModels.InvoiceModel
+{
+    public class InvoiceItemViewModel
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; }
+
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+
+        public decimal LineTotal => Quantity * UnitPrice;
+    }
+}
