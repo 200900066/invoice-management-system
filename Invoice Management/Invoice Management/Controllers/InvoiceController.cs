@@ -41,7 +41,6 @@ namespace Invoice_Management.Controllers
             return RedirectToAction("MyInvoiceDetails", new { id = invoiceId });
         }
 
-
         public async Task<ActionResult> MyInvoiceDetails(Guid id)
         {
             var invoice = await _invoiceService.GetByIdAsync(id);
@@ -72,7 +71,6 @@ namespace Invoice_Management.Controllers
             try
             {
                 await _invoiceService.FinalizeAsync(dto);
-
             }
             catch (Exception ex)
             {
