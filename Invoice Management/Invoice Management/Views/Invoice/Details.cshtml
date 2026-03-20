@@ -1,0 +1,192 @@
+﻿@model Invoice_Management.Models.InvoiceDataModel
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4">
+
+        <h3 class="mb-4">Invoice Details</h3>
+
+        <input type="hidden" id="invoiceId" value="@Model.Invoice.Id" />
+
+        <!-- ADD ITEM -->
+        <div class="row mb-3">
+            <div class="col-md-5">
+                <select id="productSelect" class="form-control">
+                    <option value="">-- Select Product --</option>
+                    @foreach (var p in Model.Products)
+                    {
+                        <option value="@p.Id"
+                                data-name="@p.Name"
+                                data-price="@p.CostPerItem">
+                            @p.Name - @p.CostPerItem
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <input type="number" id="quantity" class="form-control" placeholder="Qty" />
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-success w-100" onclick="addItem()"> Add</button>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th style="width:120px;">Qty</th>
+                    <th style="width:120px;">Price</th>
+                    <th style="width:120px;">Total</th>
+                    <th style="width:100px;"></th>
+                </tr>
+            </thead>
+
+            <tbody id="invoiceItemsBody"></tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h5>
+                Grand Total:
+                <span class="text-primary fw-bold" id="grandTotal">0.00</span>
+            </h5>
+
+            <button class="btn btn-primary px-4" onclick="finalize()">
+                Finalize
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    let invoiceItems = @Html.Raw(Json.Encode(
+        Model.Invoice.Items.Select(i => new {
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice,
+            ProductName = i.Product.Name,
+            Id = i.Id
+        }).ToList()
+    ));
+    let x = invoiceItems;
+    debugger
+    console.log(x)
+
+    const invoiceId = document.getElementById("invoiceId").value;
+
+    function renderTable() {
+        const tbody = document.getElementById("invoiceItemsBody");
+        tbody.innerHTML = "";
+
+        let total = 0;
+
+        invoiceItems.forEach((item, index) => {
+
+            const rowTotal = item.Quantity * item.UnitPrice;
+            total += rowTotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.ProductName}</td>
+
+                    <td>
+                        <input type="number" class="form-control form-control-sm"
+                               value="${item.Quantity}"
+                               onchange="updateQty(${index}, this.value)" />
+                    </td>
+
+                    <td>${item.UnitPrice.toFixed(2)}</td>
+
+                    <td class="fw-bold">${rowTotal.toFixed(2)}</td>
+
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="removeItem(${index})">
+                            ✖
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("grandTotal").innerText = total.toFixed(2);
+    }
+
+    function addItem() {
+        debugger
+        const select = document.getElementById("productSelect");
+        const quantity = parseInt(document.getElementById("quantity").value);
+
+        if (!select.value) return alert("Select a product");
+        if (!quantity || quantity <= 0) return alert("Enter valid quantity");
+
+        const selectedOption = select.options[select.selectedIndex];
+        const productId = parseInt(select.value);
+
+        const existingItem = invoiceItems.find(i => i.ProductId === productId);
+
+        if (existingItem) {
+            existingItem.Quantity += quantity;
+        } else {
+            invoiceItems.push({
+                ProductId: productId,
+                InvoiceId: invoiceId,
+                Quantity: quantity,
+                UnitPrice: parseFloat(selectedOption.getAttribute("data-price")),
+                ProductName: selectedOption.getAttribute("data-name")
+            });
+        }
+
+        document.getElementById("quantity").value = "";
+        select.selectedIndex = 0;
+
+        renderTable();
+    }
+
+    function updateQty(index, value) {
+        const qty = parseInt(value);
+
+        if (!qty || qty <= 0) return;
+
+        invoiceItems[index].Quantity = qty;
+        renderTable();
+    }
+
+    function removeItem(index) {
+        invoiceItems.splice(index, 1);
+        renderTable();
+    }
+
+    function finalize() {
+        if (invoiceItems.length === 0) {
+            alert("No items added");
+            return;
+        }
+
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = "/Invoice/Finalize";
+
+        invoiceItems.forEach((item, index) => {
+            debugger
+            form.innerHTML += `
+                <input type="hidden" name="vm[${index}].Id" value="${item.Id || ''}" />
+                <input type="hidden" name="vm[${index}].InvoiceId" value="${invoiceId}" />
+                <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
+                <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
+                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
+            `;
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    renderTable();
+</script>

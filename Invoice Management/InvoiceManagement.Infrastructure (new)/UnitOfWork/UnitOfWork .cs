@@ -1,6 +1,7 @@
 ﻿using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.Repository;
+using InvoiceManagement.Infrastructure__new_.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -18,14 +19,17 @@ namespace InvoiceManagement.Infrastructure.UnitOfWork
             // Cache repositories
             private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
 
+            private IInvoiceRepository _invoiceRepository;
+
             private DbContextTransaction _transaction;
 
             public UnitOfWork(ApplicationDbContext context)
             {
                 _context = context;
             }
-
-            // 🔹 Generic repository access
+            // Custom repos
+            public IInvoiceRepository Invoices =>  _invoiceRepository = new InvoiceRepository(_context);
+            // Generic repository access
             public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
             {
                 var type = typeof(TEntity);
@@ -39,13 +43,13 @@ namespace InvoiceManagement.Infrastructure.UnitOfWork
                 return (IGenericRepository<TEntity>)_repositories[type];
             }
 
-            // 🔹 Save changes
+            // Save changes
             public async Task<int> SaveChangesAsync()
             {
                 return await _context.SaveChangesAsync();
             }
 
-            // 🔹 Transaction (EF6 style)
+            // Transaction (EF6 style)
             public void BeginTransaction()
             {
                 if (_transaction == null)

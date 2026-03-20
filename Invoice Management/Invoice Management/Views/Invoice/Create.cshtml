@@ -1,0 +1,123 @@
+﻿@model Invoice_Management.Models.ViewModels.InvoiceModel.InvoiceCreateViewModel
+
+<h2>Invoice Details</h2>
+
+<a href="@Url.Action("Create", "Invoice")" class="btn btn-primary">
+    + Create New Invoice
+</a>
+
+<br />
+<br />
+
+<h3>Total: <span id="total">0.00</span></h3>
+
+@if (TempData["Error"] != null)
+{
+    <div style="color:red">@TempData["Error"]</div>
+}
+
+<hr />
+
+<h3>Items</h3>
+
+<table lass="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody id="itemsTable">
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            <tr>
+                <td>@Model.Items[i].ProductName</td>
+                <td>@Model.Items[i].Quantity</td>
+                <td>@Model.Items[i].UnitPrice</td>
+                <td class="item-total">@Model.Items[i].LineTotal</td>
+
+                <!-- IMPORTANT -->
+                @Html.HiddenFor(m => m.Items[i].ProductId)
+                @Html.HiddenFor(m => m.Items[i].Quantity)
+                @Html.HiddenFor(m => m.Items[i].UnitPrice)
+
+                <td>
+                    @using (Html.BeginForm("RemoveItem", "Invoice"))
+                    {
+                        @Html.Hidden("index", i)
+                        <button class="btn btn-danger btn-sm">Remove</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3>Add Item</h3>
+
+@using (Html.BeginForm("AddItem", "Invoice"))
+{
+    @Html.Hidden("invoiceId", Model.Id)
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>Product</label>
+            @Html.DropDownList("productId", Model.ProductOptions, "-- Select Product --", new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-3">
+            <label>Quantity</label>
+            <input type="number" name="quantity" class="form-control" required />
+        </div>
+
+        <div class="col-md-3" style="margin-top:25px;">
+            <button type="submit" class="btn btn-primary">
+                Add Item
+            </button>
+        </div>
+    </div>
+}
+
+<hr />
+
+@*@using (Html.BeginForm("Save", "Invoice"))
+    {
+        @Html.Hidden("invoiceId", Model.Id)
+        <button type="submit" class="btn btn-success">Finalize Invoice</button>
+    }*@
+
+
+@using (Html.BeginForm("Finalize", "Invoice", FormMethod.Post))
+{
+    for (int i = 0; i < Model.Items.Count; i++)
+    {
+        @Html.HiddenFor(m => m.Items[i].ProductId)
+        @Html.HiddenFor(m => m.Items[i].Quantity)
+        @Html.HiddenFor(m => m.Items[i].UnitPrice)
+    }
+
+    <button type="submit" class="btn btn-success">Finalize Invoice</button>
+}
+
+
+<script>
+    function calculateTotal() {
+        let total = 0;
+
+        document.querySelectorAll(".item-total").forEach(el => {
+            total += parseFloat(el.innerText);
+        });
+
+        document.getElementById("total").innerText = total.toFixed(2);
+    }
+
+    // Run on load
+    calculateTotal();
+</script>

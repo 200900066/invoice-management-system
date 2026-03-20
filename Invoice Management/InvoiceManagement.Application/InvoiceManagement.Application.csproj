@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InvoiceManagement.Core\InvoiceManagement.Domain.csproj" />
     <ProjectReference Include="..\InvoiceManagement.Infrastructure (new)\InvoiceManagement.Infrastructure (new).csproj" />
   </ItemGroup>

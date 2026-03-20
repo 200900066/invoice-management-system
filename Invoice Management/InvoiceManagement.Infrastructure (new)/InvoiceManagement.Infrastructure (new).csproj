@@ -120,10 +120,20 @@
     <Compile Include="Migrations\202603190836536_addedInvoice.Designer.cs">
       <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603191525509_FixModelChanges.cs" />
+    <Compile Include="Migrations\202603191525509_FixModelChanges.Designer.cs">
+      <DependentUpon>202603191525509_FixModelChanges.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603191949364_addedUserNameToInvoice.cs" />
+    <Compile Include="Migrations\202603191949364_addedUserNameToInvoice.Designer.cs">
+      <DependentUpon>202603191949364_addedUserNameToInvoice.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistance\ApplicationDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\GenericRepository.cs" />
+    <Compile Include="Interface\IInvoiceRepository.cs" />
+    <Compile Include="Repository\InvoiceRepository.cs" />
     <Compile Include="Repository\ProductRepository.cs" />
     <Compile Include="UnitOfWork\UnitOfWork .cs" />
   </ItemGroup>
@@ -146,6 +156,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202603190836536_addedInvoice.resx">
       <DependentUpon>202603190836536_addedInvoice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603191525509_FixModelChanges.resx">
+      <DependentUpon>202603191525509_FixModelChanges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603191949364_addedUserNameToInvoice.resx">
+      <DependentUpon>202603191949364_addedUserNameToInvoice.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

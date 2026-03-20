@@ -22,6 +22,26 @@ namespace InvoiceManagement.Infrastructure.Repository
         public virtual async Task<IEnumerable<T>> GetAllAsync()
             => await _dbSet.ToListAsync();
 
+        public virtual async Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> include)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+                query = include(query);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<T> GetSingleAsync(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IQueryable<T>> include = null)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            if (include != null)
+                query = include(query);
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
+
         public virtual async Task<T> GetByIdAsync(object id)
      => await _dbSet.FindAsync(id);
 
@@ -43,6 +63,25 @@ namespace InvoiceManagement.Infrastructure.Repository
         public virtual void Delete(T entity)
         {
             _dbSet.Remove(entity);
+        }
+
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate = null,Func<IQueryable<T>, IQueryable<T>> include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            // Apply include (ONLY if provided)
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            // Apply filter (ONLY if provided)
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }
