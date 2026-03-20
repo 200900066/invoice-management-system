@@ -1,7 +1,10 @@
-﻿using Invoice_Management.Models.ViewModels.InvoiceModel;
+﻿using Invoice_Management.Models;
+using Invoice_Management.Models.ViewModels.InvoiceModel;
 using InvoiceManagement.Application.Interface;
+using InvoiceManagement.Domain.Entities;
 using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -19,99 +22,78 @@ namespace Invoice_Management.Controllers
             _productService = productService;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View();
+            var userName = User.Identity.GetUserName();
+
+            var invoices = await _invoiceService.MyAuthorizedInvoices(userName);
+
+            return View(invoices);
         }
 
         public async Task<ActionResult> Create()
         {
             var userId = User.Identity.GetUserId();
-
             var createdByUserName = User.Identity.GetUserName();
 
-            var invoiceId = await _invoiceService.CreateAsync(userId);
+            var invoiceId = await _invoiceService.CreateAsync(createdByUserName, userId);
 
-            return RedirectToAction("Details", new { id = invoiceId });
+            return RedirectToAction("MyInvoiceDetails", new { id = invoiceId });
         }
 
-        [HttpPost]
-        public async Task<ActionResult> AddItem(Guid invoiceId, int productId, int quantity)
+
+        public async Task<ActionResult> MyInvoiceDetails(Guid id)
         {
-            try
+            var invoice = await _invoiceService.GetByIdAsync(id);
+            var product = await _productService.GetAllAsync();
+
+            var result = new InvoiceDataModel
             {
-                await _invoiceService.AddItemAsync(invoiceId, productId, quantity);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToAction("Details", new { id = invoiceId });
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> RemoveItem(Guid invoiceId, int productId)
-        {
-            try
-            {
-                await _invoiceService.RemoveItemAsync(invoiceId, productId);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToAction("Details", new { id = invoiceId });
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Save(Guid invoiceId)
-        {
-            try
-            {
-                await _invoiceService.SaveAsync(invoiceId);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToAction("Details", new { id = invoiceId });
-        }
-
-        public async Task<ActionResult> Details(Guid? id)
-        {
-            if (id == null)
-                return RedirectToAction("Index");
-
-            var invoice = await _invoiceService.GetByIdAsync(id.Value);
-
-            if (invoice == null)
-                return HttpNotFound();
-
-            var products = await _productService.GetAllAsync();
-
-            var vm = new InvoiceDetailsViewModel
-            {
-                Id = invoice.Id,
-                Total = invoice.Total,
-                Items = invoice.Items.Select(i => new InvoiceItemViewModel
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.Product.Name,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList(),
-
-                Products = products.Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.Name
-                })
+                Invoice = invoice,
+                Products = product.ToList()
             };
 
-            return View(vm);
+            return View(result);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Finalize(List<ItemViewModel> vm)
+        {
+
+
+            var dto = vm.Select(i => new InvoiceItem
+            {
+                InvoiceId = i.InvoiceId,
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList();
+
+            try
+            {
+                await _invoiceService.FinalizeAsync(dto);
+
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<ActionResult> Details(Guid id )
+        {
+            var product = await _productService.GetAllAsync();
+            var editInvoiceItems = await _invoiceService.EditInvoiceAsync(id);
+
+            var result = new InvoiceDataModel
+            {
+                Invoice = editInvoiceItems,
+                Products = product.ToList()
+            };
+
+            return View(result);
         }
     }
 }

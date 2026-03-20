@@ -4,10 +4,11 @@ using InvoiceManagement.Infrastructure.Interface;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Data.Entity;
 
 namespace InvoiceManagement.Application.Services
 {
-    using System.Data.Entity;
 
     public class InvoiceService : IInvoiceService
     {
@@ -18,12 +19,13 @@ namespace InvoiceManagement.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> CreateAsync(string userId)
+        public async Task<Guid> CreateAsync(string userName, string userId)
         {
             var invoice = new Invoice
             {
+                CreatedByUserName = userName,
                 Id = Guid.NewGuid(),
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = DateTime.Now,
                 CreatedByUserId = userId,
                 Total = 0
             };
@@ -34,70 +36,9 @@ namespace InvoiceManagement.Application.Services
             return invoice.Id;
         }
 
-        public async Task AddItemAsync(Guid invoiceId, int productId, int quantity)
+        public async Task<Invoice> EditInvoiceAsync(Guid id)
         {
-            var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productId);
-
-            if (product == null)
-                throw new Exception("Product not found");
-
-            if (quantity > product.QuantityInStock)
-                throw new Exception("Not enough stock");
-
-            var invoice = await _unitOfWork.Repository<Invoice>()
-                .GetSingleAsync(i => i.Id == invoiceId,
-                    q => q.Include("Items"));
-
-            if (invoice == null)
-                throw new Exception("Invoice not found");
-
-            var existingItem = invoice.Items
-                .FirstOrDefault(ii => ii.ProductId == productId);
-
-            if (existingItem != null)
-            {
-                existingItem.Quantity += quantity;
-            }
-            else
-            {
-                var item = new InvoiceItem
-                {
-                    Id = Guid.NewGuid(),
-                    InvoiceId = invoiceId,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    UnitPrice = product.CostPerItem
-                };
-
-                invoice.Items.Add(item);
-            }
-
-            // Always recalculate from source of truth
-            invoice.Total = invoice.Items.Sum(i => i.Quantity * i.UnitPrice);
-
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task RemoveItemAsync(Guid invoiceId, int productId)
-        {
-            var invoice = await _unitOfWork.Repository<Invoice>()
-                .GetSingleAsync(i => i.Id == invoiceId,
-                    q => q.Include("Items"));
-
-            if (invoice == null)
-                throw new Exception("Invoice not found");
-
-            var item = invoice.Items.FirstOrDefault(i => i.ProductId == productId);
-
-            if (item == null)
-                throw new Exception("Item not found");
-
-            invoice.Items.Remove(item);
-
-            //  Recalculate total
-            invoice.Total = invoice.Items.Sum(i => i.Quantity * i.UnitPrice);
-
-            await _unitOfWork.SaveChangesAsync();
+            return await _unitOfWork.Invoices.GetInvoiceWithItemsAsync(id);
         }
 
         public async Task<Invoice> GetByIdAsync(Guid id)
@@ -107,27 +48,98 @@ namespace InvoiceManagement.Application.Services
                     q => q.Include("Items.Product")); // ✅ EF6 style
         }
 
-        public async Task SaveAsync(Guid invoiceId)
+        /*   public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
+           {
+               if (items == null || !items.Any())
+                   throw new Exception("Invoice must have items");
+
+               var invoice = await _unitOfWork.Repository<Invoice>()
+                   .GetByIdAsync(items[0].InvoiceId);
+
+               foreach (var item in items)
+               {
+                   var product = await _unitOfWork.Repository<Product>()
+                       .GetByIdAsync(item.ProductId);
+
+                   if (product.QuantityInStock < item.Quantity)
+                       throw new Exception($"Not enough stock for {product.Name}");
+
+                   product.QuantityInStock -= item.Quantity;
+
+                   await _unitOfWork.Repository<InvoiceItem>().AddAsync(new InvoiceItem
+                   {
+                       Id = Guid.NewGuid(),
+                       ProductId = item.ProductId,
+                       InvoiceId = item.InvoiceId,
+                       Quantity = item.Quantity,
+                       UnitPrice = item.UnitPrice
+                   });
+               }
+
+               invoice.Total = items.Sum(i => i.Quantity * i.UnitPrice);
+
+               await _unitOfWork.Repository<Invoice>().Update(invoice);
+               await _unitOfWork.SaveChangesAsync();
+
+               return invoice.Id;
+           }*/
+
+        public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
         {
-            var invoice = await _unitOfWork.Repository<Invoice>()
-                .GetSingleAsync(i => i.Id == invoiceId,
-                    q => q.Include("Items"));
+            var invoiceId = items.First().InvoiceId;
 
-            if (invoice == null)
-                throw new Exception("Invoice not found");
+            var invoice = await _unitOfWork.Invoices
+                .GetInvoiceWithItemsAsync(invoiceId);
 
-            foreach (var item in invoice.Items)
+            // EXISTING ITEMS FROM DB
+            var existingItems = invoice.Items.ToList();
+
+            foreach (var item in items)
             {
-                var product = await _unitOfWork.Repository<Product>()
-                    .GetByIdAsync(item.ProductId);
+                var existing = existingItems
+                    .FirstOrDefault(x => x.Id == item.Id);
 
-                if (product.QuantityInStock < item.Quantity)
-                    throw new Exception($"Not enough stock for {product.Name}");
-
-                product.QuantityInStock -= item.Quantity;
+                if (existing != null)
+                {
+                    // UPDATE
+                    existing.Quantity = item.Quantity;
+                    existing.UnitPrice = item.UnitPrice;
+                }
+                else
+                {
+                    //  NEW ITEM
+                    invoice.Items.Add(new InvoiceItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    });
+                }
             }
 
+            // REMOVE DELETED ITEMS
+            foreach (var existing in existingItems)
+            {
+                if (!items.Any(i => i.Id == existing.Id))
+                {
+                    _unitOfWork.Repository<InvoiceItem>().Delete(existing);
+                }
+            }
+
+            invoice.Total = invoice.Items.Sum(i => i.Quantity * i.UnitPrice);
+
             await _unitOfWork.SaveChangesAsync();
+
+            return invoice.Id;
+        }
+
+        public async Task<IEnumerable<Invoice>> MyAuthorizedInvoices(string userName)
+        {
+            var invoices = await _unitOfWork.Repository<Invoice>().
+                  GetAsync(i => i.CreatedByUserName == userName, p => p.Include("Items"));
+
+            return invoices;
         }
     }
 }

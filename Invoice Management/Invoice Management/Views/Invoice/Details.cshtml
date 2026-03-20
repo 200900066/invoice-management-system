@@ -1,85 +1,355 @@
-﻿@model Invoice_Management.Models.ViewModels.InvoiceModel.InvoiceDetailsViewModel
+﻿<!--
 
 <h2>Invoice Details</h2>
 
-<a href="@Url.Action("Create", "Invoice")" class="btn btn-primary">
-    + Create New Invoice
-</a>
+<input type="hidden" id="invoiceId" value="@Model.Invoice.Id" />
 
-<br />
-<br />
-
-<p><strong>Total:</strong> @Model.Total</p>
-
-@if (TempData["Error"] != null)
-{
-    <div style="color:red">@TempData["Error"]</div>
-}
-
-<hr />
-
-<h3>Items</h3>
-
-<table class="table table-striped table-bordered">
-    <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Unit Price</th>
-        <th>Total</th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model.Items)
+<div class="product-row">-->
+<!-- PRODUCT SELECT -->
+<!--<select id="productSelect" class="form-control">
+    <option value="">-- Select Product --</option>
+    @foreach (var p in Model.Products)
     {
-        <tr>
-            <td>@item.ProductName</td>
-            <td>@item.Quantity</td>
-            <td>@item.UnitPrice</td>
-            <td>@item.LineTotal</td>
-            <td>
-                @using (Html.BeginForm("RemoveItem", "Invoice"))
-                {
-                    @Html.Hidden("invoiceId", Model.Id)
-                    @Html.Hidden("productId", item.ProductId)
-
-                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                }
-            </td>
-        </tr>
+        <option value="@p.Id"
+                data-name="@p.Name"
+                data-price="@p.CostPerItem">
+            @p.Name - @p.CostPerItem
+        </option>
     }
-</table>
+</select>
 
-<hr />
+<input type="number" id="quantity" class="form-control" placeholder="Quantity" />
 
-<h3>Add Item</h3>
+<button type="button" class="btn btn-success" onclick="addItem()">Add Item</button>-->
+<!-- TABLE -->
+<!--<table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
 
-@using (Html.BeginForm("AddItem", "Invoice"))
-{
-    @Html.Hidden("invoiceId", Model.Id)
+        <tbody id="invoiceItemsBody"></tbody>
+    </table>
 
-    <div class="row">
-        <div class="col-md-4">
-            <label>Product</label>
-            @Html.DropDownList("productId", Model.Products, "-- Select Product --", new { @class = "form-control" })
+    <div class="total">
+        <strong>Grand Total: <span id="grandTotal">0.00</span></strong>
+    </div>
+
+    <form id="finalizeForm" method="post" action="/Invoice/Finalize"></form>
+
+    <button type="button" class="btn btn-primary" onclick="finalize()">Finalize Invoice</button>
+
+</div>
+
+<script>
+
+    let invoiceItems = @Html.Raw(Json.Encode(
+        Model.Invoice.Items.Select(i => new {
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice,
+            ProductName = i.Product.Name
+        }).ToList()
+    ));
+
+    const invoiceId = document.getElementById("invoiceId").value;
+
+    // RENDER TABLE
+    function renderTable() {
+        const tbody = document.getElementById("invoiceItemsBody");
+        tbody.innerHTML = "";
+
+        let total = 0;
+
+        invoiceItems.forEach((item, index) => {
+
+            const rowTotal = item.Quantity * item.UnitPrice;
+            total += rowTotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.ProductName}</td>
+                    <td>${item.Quantity}</td>
+                    <td>${item.UnitPrice.toFixed(2)}</td>
+                    <td>${rowTotal.toFixed(2)}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="removeItem(${index})">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("grandTotal").innerText = total.toFixed(2);
+    }
+
+    // ADD ITEM
+    function addItem() {
+        debugger
+        const select = document.getElementById("productSelect");
+        const quantity = parseInt(document.getElementById("quantity").value);
+
+        if (!select.value) {
+            alert("Select a product");
+            return;
+        }
+
+        if (!quantity || quantity <= 0) {
+            alert("Enter valid quantity");
+            return;
+        }
+
+        const selectedOption = select.options[select.selectedIndex];
+        const productId = parseInt(select.value);
+
+        // CHECK IF PRODUCT EXISTS
+        const existingItem = invoiceItems.find(i => i.ProductId === productId);
+
+        if (existingItem) {
+            existingItem.Quantity += quantity;
+        } else {
+            // ADD NEW ITEM
+            invoiceItems.push({
+                ProductId: productId,
+                InvoiceId: invoiceId,
+                Quantity: quantity,
+                UnitPrice: parseFloat(selectedOption.getAttribute("data-price")),
+                ProductName: selectedOption.getAttribute("data-name")
+            });
+        }
+
+        // RESET INPUTS
+        document.getElementById("quantity").value = "";
+        select.selectedIndex = 0;
+
+        renderTable();
+    }
+
+    // REMOVE ITEM
+    function removeItem(index) {
+        invoiceItems.splice(index, 1);
+        renderTable();
+    }
+
+    // FINALIZE
+    function finalize() {
+
+        if (invoiceItems.length === 0) {
+            alert("No items added");
+            return;
+        }
+
+        const form = document.getElementById("finalizeForm");
+        form.innerHTML = "";
+
+        invoiceItems.forEach((item, index) => {
+            form.innerHTML += `
+                <input type="hidden" name="vm[${index}].InvoiceId" value="${invoiceId}" />
+                <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
+                <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
+                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
+            `;
+        });
+
+        form.submit();
+    }
+
+    // INITIAL LOAD
+    renderTable();
+
+</script>-->
+
+
+
+@model Invoice_Management.Models.InvoiceDataModel
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4">
+
+        <h3 class="mb-4">Invoice Details</h3>
+
+        <input type="hidden" id="invoiceId" value="@Model.Invoice.Id" />
+
+        <!-- ADD ITEM -->
+        <div class="row mb-3">
+            <div class="col-md-5">
+                <select id="productSelect" class="form-control">
+                    <option value="">-- Select Product --</option>
+                    @foreach (var p in Model.Products)
+                    {
+                        <option value="@p.Id"
+                                data-name="@p.Name"
+                                data-price="@p.CostPerItem">
+                            @p.Name - @p.CostPerItem
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <input type="number" id="quantity" class="form-control" placeholder="Qty" />
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-success w-100" onclick="addItem()"> Add</button>
+            </div>
         </div>
 
-        <div class="col-md-3">
-            <label>Quantity</label>
-            <input type="number" name="quantity" class="form-control" required />
-        </div>
+        <!-- TABLE -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th style="width:120px;">Qty</th>
+                    <th style="width:120px;">Price</th>
+                    <th style="width:120px;">Total</th>
+                    <th style="width:100px;"></th>
+                </tr>
+            </thead>
 
-        <div class="col-md-3" style="margin-top:25px;">
-            <button type="submit" class="btn btn-primary">
-                Add Item
+            <tbody id="invoiceItemsBody"></tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h5>
+                Grand Total:
+                <span class="text-primary fw-bold" id="grandTotal">0.00</span>
+            </h5>
+
+            <button class="btn btn-primary px-4" onclick="finalize()">
+                Finalize
             </button>
         </div>
+
     </div>
-}
 
-<hr />
+</div>
 
-@using (Html.BeginForm("Save", "Invoice"))
-{
-    @Html.Hidden("invoiceId", Model.Id)
-    <button type="submit" class="btn btn-success">Finalize Invoice</button>
-}
+<script>
+    let invoiceItems = @Html.Raw(Json.Encode(
+        Model.Invoice.Items.Select(i => new {
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice,
+            ProductName = i.Product.Name
+        }).ToList()
+    ));
+
+    const invoiceId = document.getElementById("invoiceId").value;
+
+    function renderTable() {
+        const tbody = document.getElementById("invoiceItemsBody");
+        tbody.innerHTML = "";
+
+        let total = 0;
+
+        invoiceItems.forEach((item, index) => {
+
+            const rowTotal = item.Quantity * item.UnitPrice;
+            total += rowTotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.ProductName}</td>
+
+                    <td>
+                        <input type="number" class="form-control form-control-sm"
+                               value="${item.Quantity}"
+                               onchange="updateQty(${index}, this.value)" />
+                    </td>
+
+                    <td>${item.UnitPrice.toFixed(2)}</td>
+
+                    <td class="fw-bold">${rowTotal.toFixed(2)}</td>
+
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="removeItem(${index})">
+                            ✖
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("grandTotal").innerText = total.toFixed(2);
+    }
+
+    function addItem() {
+        const select = document.getElementById("productSelect");
+        const quantity = parseInt(document.getElementById("quantity").value);
+
+        if (!select.value) return alert("Select a product");
+        if (!quantity || quantity <= 0) return alert("Enter valid quantity");
+
+        const selectedOption = select.options[select.selectedIndex];
+        const productId = parseInt(select.value);
+
+        const existingItem = invoiceItems.find(i => i.ProductId === productId);
+
+        if (existingItem) {
+            existingItem.Quantity += quantity;
+        } else {
+            invoiceItems.push({
+                ProductId: productId,
+                InvoiceId: invoiceId,
+                Quantity: quantity,
+                UnitPrice: parseFloat(selectedOption.getAttribute("data-price")),
+                ProductName: selectedOption.getAttribute("data-name")
+            });
+        }
+
+        document.getElementById("quantity").value = "";
+        select.selectedIndex = 0;
+
+        renderTable();
+    }
+
+    function updateQty(index, value) {
+        const qty = parseInt(value);
+
+        if (!qty || qty <= 0) return;
+
+        invoiceItems[index].Quantity = qty;
+        renderTable();
+    }
+
+    function removeItem(index) {
+        invoiceItems.splice(index, 1);
+        renderTable();
+    }
+
+    function finalize() {
+        if (invoiceItems.length === 0) {
+            alert("No items added");
+            return;
+        }
+
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = "/Invoice/Finalize";
+
+        invoiceItems.forEach((item, index) => {
+            form.innerHTML += `
+                <input type="hidden" name="vm[${index}].InvoiceId" value="${invoiceId}" />
+                <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
+                <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
+                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
+            `;
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    renderTable();
+</script>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Invoice_Management.Models.ViewModels.InvoiceModel
+﻿namespace Invoice_Management.Models.ViewModels.InvoiceModel
 {
     public class InvoiceItemViewModel
     {
