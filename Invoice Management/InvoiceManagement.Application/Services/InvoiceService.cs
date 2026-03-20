@@ -48,44 +48,94 @@ namespace InvoiceManagement.Application.Services
                     q => q.Include("Items.Product")); // ✅ EF6 style
         }
 
-        /*   public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
-           {
-               if (items == null || !items.Any())
-                   throw new Exception("Invoice must have items");
+        //public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
+        //{
+        //    if (items == null || !items.Any())
+        //        throw new Exception("Invoice must have items");
 
-               var invoice = await _unitOfWork.Repository<Invoice>()
-                   .GetByIdAsync(items[0].InvoiceId);
+        //    var invoiceId = items.First().InvoiceId;
 
-               foreach (var item in items)
-               {
-                   var product = await _unitOfWork.Repository<Product>()
-                       .GetByIdAsync(item.ProductId);
+        //    var invoice = await _unitOfWork.Invoices
+        //        .GetInvoiceWithItemsAsync(invoiceId);
 
-                   if (product.QuantityInStock < item.Quantity)
-                       throw new Exception($"Not enough stock for {product.Name}");
+        //    var existingItems = invoice.Items.ToList();
 
-                   product.QuantityInStock -= item.Quantity;
+        //    foreach (var item in items)
+        //    {
+        //        var product = await _unitOfWork.Repository<Product>()
+        //            .GetByIdAsync(item.ProductId);
 
-                   await _unitOfWork.Repository<InvoiceItem>().AddAsync(new InvoiceItem
-                   {
-                       Id = Guid.NewGuid(),
-                       ProductId = item.ProductId,
-                       InvoiceId = item.InvoiceId,
-                       Quantity = item.Quantity,
-                       UnitPrice = item.UnitPrice
-                   });
-               }
+        //        var existing = existingItems
+        //            .FirstOrDefault(x => x.Id == item.Id);
 
-               invoice.Total = items.Sum(i => i.Quantity * i.UnitPrice);
+        //        if (existing != null)
+        //        {
+        //            // UPDATE EXISTING ITEM
 
-               await _unitOfWork.Repository<Invoice>().Update(invoice);
-               await _unitOfWork.SaveChangesAsync();
+        //            var quantityDifference = item.Quantity - existing.Quantity;
 
-               return invoice.Id;
-           }*/
+        //            // Only validate if increasing quantity
+        //            if (quantityDifference > 0)
+        //            {
+        //                if (product.QuantityInStock < quantityDifference)
+        //                    throw new Exception($"Not enough stock for {product.Name}");
+
+        //                product.QuantityInStock -= quantityDifference;
+        //            }
+        //            else if (quantityDifference < 0)
+        //            {
+        //                // Returning stock if reduced
+        //                product.QuantityInStock += Math.Abs(quantityDifference);
+        //            }
+
+        //            existing.Quantity = item.Quantity;
+        //            existing.UnitPrice = item.UnitPrice;
+        //        }
+        //        else
+        //        {
+        //            // NEW ITEM
+
+        //            if (product.QuantityInStock < item.Quantity)
+        //                throw new Exception($"Not enough stock for {product.Name}");
+
+        //            product.QuantityInStock -= item.Quantity;
+
+        //            invoice.Items.Add(new InvoiceItem
+        //            {
+        //                Id = Guid.NewGuid(),
+        //                ProductId = item.ProductId,
+        //                Quantity = item.Quantity,
+        //                UnitPrice = item.UnitPrice
+        //            });
+        //        }
+        //    }
+
+        //    // HANDLE DELETED ITEMS (RETURN STOCK)
+        //    foreach (var existing in existingItems)
+        //    {
+        //        if (!items.Any(i => i.Id == existing.Id))
+        //        {
+        //            var product = await _unitOfWork.Repository<Product>()
+        //                .GetByIdAsync(existing.ProductId);
+
+        //            product.QuantityInStock += existing.Quantity;
+
+        //            _unitOfWork.Repository<InvoiceItem>().Delete(existing);
+        //        }
+        //    }
+
+        //    // RECALCULATE TOTAL
+        //    invoice.Total = invoice.Items.Sum(i => i.Quantity * i.UnitPrice);
+
+        //    await _unitOfWork.SaveChangesAsync();
+
+        //    return invoice.Id;
+        //}
 
         public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
         {
+            if (items == null || !items.Any())
+                throw new Exception("Invoice must have items");
             var invoiceId = items.First().InvoiceId;
 
             var invoice = await _unitOfWork.Invoices
@@ -97,7 +147,16 @@ namespace InvoiceManagement.Application.Services
             foreach (var item in items)
             {
                 var existing = existingItems
-                    .FirstOrDefault(x => x.Id == item.Id);
+                    .FirstOrDefault(x => x.ProductId == item.ProductId);
+
+                var product = await _unitOfWork.Repository<Product>()
+                  .GetByIdAsync(item.ProductId);
+
+                if (product.QuantityInStock < item.Quantity)
+                    throw new Exception($"Not enough stock for {product.Name}");
+
+                product.QuantityInStock -= item.Quantity;
+
 
                 if (existing != null)
                 {
