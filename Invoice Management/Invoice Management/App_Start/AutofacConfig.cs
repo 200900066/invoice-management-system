@@ -5,7 +5,6 @@ using InvoiceManagement.Application.Services;
 using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.UnitOfWork;
-using InvoiceManagement.Infrastructure.UnitOfWork.InvoiceManagement.Infrastructure.UnitOfWork;
 using System.Web.Mvc;
 
 namespace Invoice_Management.App_Start
