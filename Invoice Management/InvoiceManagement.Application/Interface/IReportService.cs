@@ -6,5 +6,6 @@ namespace InvoiceManagement.Application.Interface
     public interface IReportService
     {
         Task<ReportData> GetReports();
+        Task<string> GetLowStockNotification();
     }
 }

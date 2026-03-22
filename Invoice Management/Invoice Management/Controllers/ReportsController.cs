@@ -17,6 +17,12 @@ namespace Invoice_Management.Controllers
         public async Task<ActionResult> Index()
         {
             var vm = await _reportService.GetReports();
+            var warning = await _reportService.GetLowStockNotification();
+
+            if (!string.IsNullOrEmpty(warning))
+            {
+                TempData["Warning"] = warning;
+            }
             return View(vm);
         }
     }

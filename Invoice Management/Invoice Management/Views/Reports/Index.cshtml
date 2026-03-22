@@ -1,5 +1,4 @@
-﻿
-@model InvoiceManagement.Application.Services.ReportData
+﻿@model InvoiceManagement.Application.Services.ReportData
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -89,14 +88,19 @@
         border-radius: 4px;
         font-family: monospace;
     }
+
+    .low-stock {
+        background-color: #ffe5e5;
+        color: #b91c1c;
+        font-weight: 600;
+    }
 </style>
 
 <div class="report-body">
     <div class="container">
 
         <header style="margin-bottom: 30px;">
-            <h1>Inventory Performance</h1>
-            <p style="color: #64748b;">Real-time stock and sales breakdown</p>
+            <h1>IMS Reporting</h1>
         </header>
 
         <!--CARDS -->
@@ -122,7 +126,7 @@
             </div>
         </div>
 
-        <!--TABLE -->
+        <!-- TABLE -->
         <div class="table-container">
             <div class="table-header">
                 <strong>Product Sales Details</strong>
@@ -134,15 +138,25 @@
                         <th>Product ID</th>
                         <th>Product Name</th>
                         <th>Total Items Sold</th>
+                        <th>Stock</th> 
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.ProductSales)
                     {
-                        <tr>
+                        var isLow = item.QuantityInStock <= 5;
+
+                        <tr class="@(isLow ? "low-stock" : "")">
                             <td><span class="id-badge">#@item.ProductId</span></td>
-                            <td>@item.ProductName</td>
+                            <td>
+                                @item.ProductName
+                                @if (isLow)
+                                {
+                                    <span style="color:red;"> (Low)</span>
+                                }
+                            </td>
                             <td><strong>@item.TotalItemsSold</strong></td>
+                            <td>@item.QuantityInStock</td>
                         </tr>
                     }
                 </tbody>
