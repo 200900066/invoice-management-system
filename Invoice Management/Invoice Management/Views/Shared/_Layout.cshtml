@@ -174,8 +174,8 @@
             positionClass: "toast-top-center",
             newestOnTop: true,
             preventDuplicates: true,
-            timeOut: "2500",
-            extendedTimeOut: "1000",
+            timeOut: "20000",
+            extendedTimeOut: "10000",
             showDuration: "2000",
             hideDuration: "2000",
             showMethod: "fadeIn",
@@ -193,6 +193,13 @@
     {
         <script>
         toastr.success("@TempData["Success"]");
+        </script>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <script>
+        toastr.warning("@TempData["Warning"]");
         </script>
     }
 

@@ -27,14 +27,20 @@ namespace InvoiceManagement.Application.Services
             // Total stock
             var totalStock = await _context.Products
                 .SumAsync(p => (int?)p.QuantityInStock) ?? 0;
-
-            // Per product
             var productSales = await _context.InvoiceItems
-                .GroupBy(ii => new { ii.ProductId, ii.Product.Name })
+                .Select(ii => new
+                {
+                    ii.ProductId,
+                    ProductName = ii.Product.Name,
+                    QuantityInStock = ii.Product.QuantityInStock,
+                    Quantity = ii.Quantity
+                })
+                .GroupBy(x => new { x.ProductId, x.ProductName, x.QuantityInStock })
                 .Select(g => new ProductSales
                 {
                     ProductId = g.Key.ProductId,
-                    ProductName = g.Key.Name,
+                    ProductName = g.Key.ProductName,
+                    QuantityInStock = g.Key.QuantityInStock,
                     TotalItemsSold = g.Sum(x => x.Quantity)
                 })
                 .ToListAsync();
@@ -48,6 +54,28 @@ namespace InvoiceManagement.Application.Services
                 TotalSold = totalProductsSold,
                 ProductSales = productSales
             };
+        }
+
+        public async Task<string> GetLowStockNotification()
+        {
+            int threshold = 5;
+
+            var lowStockItems = await _context.Products
+                .Where(p => p.QuantityInStock <= threshold)
+                .Select(p => new
+                {
+                    p.Name,
+                    p.QuantityInStock
+                })
+                .ToListAsync();
+
+            if (!lowStockItems.Any())
+                return null;
+
+            var message = "Low Stock: " + string.Join(", ",
+                lowStockItems.Select(x => $"{x.Name} ({x.QuantityInStock})"));
+
+            return message;
         }
     }
 }
