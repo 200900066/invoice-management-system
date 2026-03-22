@@ -29,6 +29,7 @@
     <title>@ViewBag.Title - Invoice System</title>
 
     @Styles.Render("~/Content/css")
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     @Scripts.Render("~/bundles/modernizr")
 
     <style>
@@ -46,6 +47,11 @@
             .navbar-brand:hover {
                 opacity: 1;
             }
+    </style>
+    <style>
+        #toast-container.toast-top-center {
+            top: 70px;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +107,7 @@
                                     new { @class = "nav-link " + IsActive("Reports") })
                             </li>
                         }
+
                     }
                 </ul>
 
@@ -159,6 +166,35 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-center",
+            newestOnTop: true,
+            preventDuplicates: true,
+            timeOut: "2500",
+            extendedTimeOut: "1000",
+            showDuration: "2000",
+            hideDuration: "2000",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+        };
+    </script>
+    @if (TempData["Error"] != null)
+    {
+        <script>
+        toastr.error("@TempData["Error"]");
+        </script>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <script>
+        toastr.success("@TempData["Success"]");
+        </script>
+    }
 
 </body>
 </html>

@@ -24,8 +24,13 @@ namespace Invoice_Management.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var userName = User.Identity.GetUserName();
+            if (User.IsInRole("Manager"))
+            {
+                var allInvoices = await _invoiceService.ManageInvoice();
+                return View(allInvoices);
+            }
 
+            var userName = User.Identity.GetUserName();
             var invoices = await _invoiceService.MyAuthorizedInvoices(userName);
 
             return View(invoices);
@@ -41,9 +46,23 @@ namespace Invoice_Management.Controllers
             return RedirectToAction("MyInvoiceDetails", new { id = invoiceId });
         }
 
+        [Authorize(Roles = "User,Manager")]
         public async Task<ActionResult> MyInvoiceDetails(Guid id)
         {
             var invoice = await _invoiceService.GetByIdAsync(id);
+            if (invoice == null)
+            {
+                TempData["Error"] = "Invoice not found";
+                return RedirectToAction("Index");
+            }
+
+            if (!User.IsInRole("Manager") && invoice.CreatedByUserName != User.Identity.GetUserName())
+            {
+                TempData["Error"] = "You are not allowed to edit this invoice";
+
+                return RedirectToAction("Index");
+            }
+
             var product = await _productService.GetAllAsync();
 
             var result = new InvoiceDataModel
@@ -53,6 +72,14 @@ namespace Invoice_Management.Controllers
             };
 
             return View(result);
+        }
+
+        [Authorize(Roles = "Manager")]
+        public async Task<ActionResult> Manage()
+        {
+            var invoices = await _invoiceService.ManageInvoice();
+
+            return View(invoices);
         }
 
         [HttpPost]
@@ -71,6 +98,7 @@ namespace Invoice_Management.Controllers
             try
             {
                 await _invoiceService.FinalizeAsync(dto);
+                TempData["Success"] = "Invoice saved successfully";
             }
             catch (Exception ex)
             {
@@ -80,9 +108,11 @@ namespace Invoice_Management.Controllers
             return RedirectToAction("Index");
         }
 
+
         public async Task<ActionResult> Details(Guid id )
         {
             var product = await _productService.GetAllAsync();
+         
             var editInvoiceItems = await _invoiceService.EditInvoiceAsync(id);
 
             var result = new InvoiceDataModel

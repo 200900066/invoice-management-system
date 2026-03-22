@@ -38,6 +38,17 @@ namespace InvoiceManagement.Application.Services
             return invoice.Id;
         }
 
+        public async Task<IEnumerable<Invoice>> ManageInvoice()
+        {
+            var invoices = await _unitOfWork.Repository<Invoice>()
+                .GetAsync(
+                    null,
+                    q => q.Include("Items.Product")
+                );
+
+            return invoices;
+        }
+
         public async Task<Invoice> EditInvoiceAsync(Guid id)
         {
             return await _unitOfWork.Invoices.GetInvoiceWithItemsAsync(id);
@@ -83,8 +94,7 @@ namespace InvoiceManagement.Application.Services
             catch (Exception ex)
             {
                 _unitOfWork.Rollback();
-                //_logger.LogError(ex, "Error finalizing invoice {InvoiceId}",
-                // items?.FirstOrDefault()?.InvoiceId);
+               
                 throw;
             }
         }
@@ -151,8 +161,7 @@ namespace InvoiceManagement.Application.Services
             // Increase consume stock
             if (difference > 0)
             {
-                if (product.QuantityInStock < difference)
-                    throw new Exception($"Not enough stock for {product.Name}");
+                if (product.QuantityInStock < difference) throw new Exception($"Not enough stock for {product.Name}");
 
                 product.QuantityInStock -= difference;
             }
