@@ -32,6 +32,10 @@ namespace Invoice_Management.App_Start
                    .As<IInvoiceService>()
                    .InstancePerRequest();
 
+            builder.RegisterType<ReportService>()
+                  .As<IReportService>()
+                  .InstancePerRequest();
+
             var container = builder.Build();
 
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

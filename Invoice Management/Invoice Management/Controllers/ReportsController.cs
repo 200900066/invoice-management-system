@@ -1,17 +1,23 @@
-﻿using System.Web.Mvc;
+﻿using InvoiceManagement.Application.Interface;
+using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace Invoice_Management.Controllers
 {
     [Authorize(Roles = "Manager")]
     public class ReportsController : Controller
     {
-        public ActionResult Index()
+        private readonly IReportService _reportService;
+        public ReportsController(IReportService reportService)
         {
-            return View();
+            _reportService = reportService;
         }
-        public ActionResult Dashboard()
+
+        [Authorize(Roles = "Manager")]
+        public async Task<ActionResult> Index()
         {
-            return View();
+            var vm = await _reportService.GetReports();
+            return View(vm);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Invoice_Management.Controllers
                         return RedirectToAction("Index", "User");
 
                     if (await userManager.IsInRoleAsync(user.Id, "Manager"))
-                        return RedirectToAction("Dashboard", "Reports");
+                        return RedirectToAction("Index", "Reports");
 
                     return RedirectToAction("Index", "Invoice");
 
