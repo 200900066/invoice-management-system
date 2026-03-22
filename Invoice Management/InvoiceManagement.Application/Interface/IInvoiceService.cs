@@ -12,5 +12,6 @@ namespace InvoiceManagement.Application.Interface
         Task<IEnumerable<Invoice>> MyAuthorizedInvoices(string userId);
         Task<Guid> FinalizeAsync(List<InvoiceItem> items);
         Task<Invoice> EditInvoiceAsync(Guid id);
+        Task<IEnumerable<Invoice>> ManageInvoice();
     }
 }

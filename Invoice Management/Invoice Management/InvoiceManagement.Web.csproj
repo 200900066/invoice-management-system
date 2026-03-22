@@ -269,11 +269,13 @@
     <Content Include="Views\Invoice\Index.cshtml" />
     <Content Include="Views\Invoice\Create.cshtml" />
     <Content Include="Views\Invoice\MyInvoiceDetails.cshtml" />
+    <Content Include="Views\Invoice\ManagerInvoiceView.cshtml" />
+    <Content Include="Views\Reports\Dashboard.cshtml" />
+    <Content Include="Views\Reports\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Views\Admin\" />
-    <Folder Include="Views\Reports\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InvoiceManagement.Application\InvoiceManagement.Application.csproj">

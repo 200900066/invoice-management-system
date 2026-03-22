@@ -9,77 +9,76 @@ using System.Threading.Tasks;
 
 namespace InvoiceManagement.Infrastructure.UnitOfWork
 {
-    
-    namespace InvoiceManagement.Infrastructure.UnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
-        public class UnitOfWork : IUnitOfWork
+        private readonly ApplicationDbContext _context;
+        private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
+        private IInvoiceRepository _invoiceRepository;
+        private DbContextTransaction _transaction;
+
+        public UnitOfWork(ApplicationDbContext context)
         {
-            private readonly ApplicationDbContext _context;
+            _context = context;
+        }
 
-            // Cache repositories
-            private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
-
-            private IInvoiceRepository _invoiceRepository;
-
-            private DbContextTransaction _transaction;
-
-            public UnitOfWork(ApplicationDbContext context)
+        // custom repo
+        public IInvoiceRepository Invoices
+        {
+            get
             {
-                _context = context;
+                return _invoiceRepository
+                    ?? (_invoiceRepository = new InvoiceRepository(_context));
             }
-            // Custom repos
-            public IInvoiceRepository Invoices =>  _invoiceRepository = new InvoiceRepository(_context);
-            // Generic repository access
-            public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
+        }
+
+        public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
+        {
+            var type = typeof(TEntity);
+
+            if (!_repositories.ContainsKey(type))
             {
-                var type = typeof(TEntity);
-
-                if (!_repositories.ContainsKey(type))
-                {
-                    var repo = new GenericRepository<TEntity>(_context);
-                    _repositories[type] = repo;
-                }
-
-                return (IGenericRepository<TEntity>)_repositories[type];
+                _repositories[type] = new GenericRepository<TEntity>(_context);
             }
 
-            // Save changes
-            public async Task<int> SaveChangesAsync()
-            {
-                return await _context.SaveChangesAsync();
-            }
+            return (IGenericRepository<TEntity>)_repositories[type];
+        }
 
-            // Transaction (EF6 style)
-            public void BeginTransaction()
-            {
-                if (_transaction == null)
-                {
-                    _transaction = _context.Database.BeginTransaction();
-                }
-            }
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
 
-            public void Commit()
+        public void BeginTransaction()
+        {
+            if (_transaction == null)
             {
-                try
-                {
-                    _context.SaveChanges();
-                    _transaction?.Commit();
-                    _transaction?.Dispose();
-                    _transaction = null;
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
-                }
+                _transaction = _context.Database.BeginTransaction();
             }
+        }
 
-            public void Rollback()
+        public void Commit()
+        {
+            try
             {
-                _transaction?.Rollback();
+                _transaction?.Commit();
+            }
+            catch
+            {
+                Rollback();
+                throw;
+            }
+            finally
+            {
                 _transaction?.Dispose();
                 _transaction = null;
             }
+        }
+
+        public void Rollback()
+        {
+            _transaction?.Rollback();
+            _transaction?.Dispose();
+            _transaction = null;
         }
     }
 }
