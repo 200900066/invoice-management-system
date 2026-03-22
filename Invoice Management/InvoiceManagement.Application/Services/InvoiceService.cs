@@ -58,7 +58,7 @@ namespace InvoiceManagement.Application.Services
         {
             return await _unitOfWork.Repository<Invoice>()
                 .GetSingleAsync(i => i.Id == id,
-                    q => q.Include("Items.Product")); // EF6 style
+                    q => q.Include("Items.Product")); 
         }
 
         public async Task<IEnumerable<Invoice>> MyAuthorizedInvoices(string userName)
