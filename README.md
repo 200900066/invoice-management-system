@@ -49,6 +49,8 @@ Create a user and assign a role (Admin / Manager / User)
 - Product CRUD
 - Invoice Management
 - Role-based access
+- Toast notification
+- Reporting
 
 8. Troubleshooting
 - Ensure SQL Server is running
