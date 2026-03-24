@@ -26,7 +26,7 @@ NOTE:
 (localdb)\MSSQLLocalDB may not work — replace with your SQL Server instance.
 
 4. Run Migrations (IMPORTANT)
-Open Package Manager Console and run:
+Open Package Manager Console, select InvoiceManagement.Infrastructure (new)  and run:
 
 Update-Database
 
