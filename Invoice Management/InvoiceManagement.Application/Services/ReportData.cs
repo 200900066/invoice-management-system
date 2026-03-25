@@ -9,6 +9,7 @@ namespace InvoiceManagement.Application.Services
         public int TotalStock { get; set; }
         public int TotalInStock { get; set; }
         public int TotalSold { get; set; }
-        public List<ProductSales> ProductSales { get; set; }
+        public List<ProductSales> ItemsSoldPerProduct { get; set; }  
+        public List<ProductSales> StockVsSoldPerProduct { get; set; }
     }
 }

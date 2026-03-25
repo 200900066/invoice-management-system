@@ -27,13 +27,15 @@ namespace InvoiceManagement.Application.Services
             // Total stock
             var totalStock = await _context.Products
                 .SumAsync(p => (int?)p.QuantityInStock) ?? 0;
-            var productSales = await _context.InvoiceItems
-                .Select(ii => new
+
+            var stockVsSoldPerProduct = await _context.Products
+                .SelectMany(p => _context.InvoiceItems.Where(ii => ii.ProductId == p.Id)
+                .DefaultIfEmpty(), (p, ii) => new
                 {
-                    ii.ProductId,
-                    ProductName = ii.Product.Name,
-                    QuantityInStock = ii.Product.QuantityInStock,
-                    Quantity = ii.Quantity
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    p.QuantityInStock,
+                    Quantity = (int?)ii.Quantity ?? 0
                 })
                 .GroupBy(x => new { x.ProductId, x.ProductName, x.QuantityInStock })
                 .Select(g => new ProductSales
@@ -45,14 +47,26 @@ namespace InvoiceManagement.Application.Services
                 })
                 .ToListAsync();
 
+            var itemsSoldPerProduct = await _context.Products
+               .GroupJoin(
+                   _context.InvoiceItems,
+                   p => p.Id,
+                   ii => ii.ProductId,
+                   (p, items) => new ProductSales
+                   {
+                       ProductId = p.Id,
+                       ProductName = p.Name,
+                       TotalItemsSold = items.Sum(x => (int?)x.Quantity) ?? 0
+                   })
+               .ToListAsync();
+
             return new ReportData
             {
                 TotalProducts = totalProducts,
                 TotalProductsSold = totalProductsSold,
                 TotalStock = totalStock,
-                TotalInStock = totalStock,
-                TotalSold = totalProductsSold,
-                ProductSales = productSales
+                StockVsSoldPerProduct = stockVsSoldPerProduct,
+                ItemsSoldPerProduct = itemsSoldPerProduct
             };
         }
 
