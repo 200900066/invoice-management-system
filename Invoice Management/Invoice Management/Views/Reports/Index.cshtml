@@ -1,4 +1,4 @@
-﻿@model InvoiceManagement.Application.Services.ReportData
+﻿@model Invoice_Management.Models.ViewModels.ReportsViewModel
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -47,6 +47,13 @@
     <div class="container">
 
         <h2 class="mb-4">IMS Reporting</h2>
+
+        <div class="d-flex justify-content-end mb-3">
+            <a href="@Url.Action("LowStock", "Reports")" class="btn btn-warning">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                Low Stock
+            </a>
+        </div>
 
         <!-- CARDS -->
         <div class="stats-grid">

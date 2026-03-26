@@ -4,41 +4,126 @@
 
 @if (!User.IsInRole("Manager"))
 {
-
-    <a href="@Url.Action("Create", "Invoice")" class="btn btn-primary">
+    <a href="@Url.Action("Create", "Invoice")" class="btn btn-primary mb-2">
         + Create New Invoice
     </a>
 }
-    <h2>My Invoices</h2>
 
-    <table class="table">
-        <thead>
+<h2>My Invoices</h2>
+
+<input type="text" id="searchInput"
+       placeholder="Search username..."
+       class="form-control"
+       style="width:250px; margin-bottom:10px;" />
+
+<table class="table" id="invoiceTable">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>User</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th>Date</th>
-                <th>User</th>
-                <th>Total</th>
-                <th></th>
+                <td class="row-number"></td>
+                <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
+                <td class="username">@item.CreatedByUserName</td>
+                <td>@item.Total.ToString("0.00")</td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Invoice",
+                        new { id = item.Id },
+                        new { @class = "btn btn-warning btn-sm" })
+                </td>
             </tr>
-        </thead>
+        }
+    </tbody>
+</table>
 
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
-                    <td>@item.CreatedByUserName</td>
-                    <td>@item.Total.ToString("0.00")</td>
+<div id="pagination" style="margin-top:10px;"></div>
 
-                    <td>
-                        @Html.ActionLink(
-                            "Details",
-                            "Details",
-                            "Invoice",
-                            new { id = item.Id },
-                            new { @class = "btn btn-warning btn-sm" }
-                        )
-                    </td>
-                </tr>
+<script>
+    (function () {
+
+        const rowsPerPage = 10;
+
+        const table = document.getElementById("invoiceTable");
+        const tbody = table.querySelector("tbody");
+        const allRows = Array.from(tbody.querySelectorAll("tr"));
+
+        const pagination = document.getElementById("pagination");
+        const searchInput = document.getElementById("searchInput");
+
+        let filteredRows = [...allRows];
+        let currentPage = 1;
+
+        function displayTable(page) {
+            currentPage = page;
+
+            tbody.innerHTML = "";
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            const pageRows = filteredRows.slice(start, end);
+
+            pageRows.forEach((row, index) => {
+
+                const numberCell = row.querySelector(".row-number");
+                numberCell.innerText = start + index + 1;
+
+                tbody.appendChild(row);
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+
+            pagination.innerHTML = "";
+
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+
+                const btn = document.createElement("button");
+
+                btn.innerText = i;
+
+                btn.className = "btn " + (i === currentPage ? "btn-primary" : "btn-light");
+
+                btn.style.margin = "2px";
+
+                btn.onclick = function () {
+                    displayTable(i);
+                };
+
+                pagination.appendChild(btn);
             }
-        </tbody>
-    </table>
+        }
+
+        searchInput.addEventListener("keyup", function () {
+
+            const value = this.value.toLowerCase();
+
+            filteredRows = allRows.filter(function (row) {
+
+                const username = row.querySelector(".username").innerText.toLowerCase();
+
+                return username.includes(value);
+            });
+
+            currentPage = 1;
+
+            displayTable(currentPage);
+        });
+
+        displayTable(1);
+
+    })();
+</script>

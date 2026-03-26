@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Invoice_Management.Models.ViewModels
 {
-    public class ProductListViewModel
+    public class ProductViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

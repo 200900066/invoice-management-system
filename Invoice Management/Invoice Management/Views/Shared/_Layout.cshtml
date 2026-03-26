@@ -72,8 +72,8 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <!-- Invoices (ALL roles) -->
-                        if (IsUser() || IsAdmin() || IsManager())
+          
+                        if (IsUser() || IsManager())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Invoices", "Index", "Invoice", null,
@@ -81,8 +81,7 @@
                             </li>
                         }
 
-                        <!-- Products (ALL roles as per your requirement) -->
-                        if (IsUser() || IsAdmin() || IsManager())
+                        if ( IsManager())
                         {
                             <li class="nav-item">
                                 @Html.ActionLink("Products", "Index", "Product", null,
@@ -90,7 +89,6 @@
                             </li>
                         }
 
-                        <!-- Users (ADMIN ONLY) -->
                         if (IsAdmin())
                         {
                             <li class="nav-item">

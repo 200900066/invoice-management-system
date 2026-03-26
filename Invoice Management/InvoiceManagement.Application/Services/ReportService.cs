@@ -1,4 +1,5 @@
 ﻿using InvoiceManagement.Application.Interface;
+using InvoiceManagement.Domain.Entities;
 using InvoiceManagement.Infrastructure.Persistance;
 using System.Data.Entity;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace InvoiceManagement.Application.Services
             _context = context;
         }
 
-        public async Task<ReportData> GetReports()
+        public async Task<Report> GetReports()
         {
             // Total products
             var totalProducts = _context.Products.Count();
@@ -38,7 +39,7 @@ namespace InvoiceManagement.Application.Services
                     Quantity = (int?)ii.Quantity ?? 0
                 })
                 .GroupBy(x => new { x.ProductId, x.ProductName, x.QuantityInStock })
-                .Select(g => new ProductSales
+                .Select(g => new ProductSale
                 {
                     ProductId = g.Key.ProductId,
                     ProductName = g.Key.ProductName,
@@ -52,7 +53,7 @@ namespace InvoiceManagement.Application.Services
                    _context.InvoiceItems,
                    p => p.Id,
                    ii => ii.ProductId,
-                   (p, items) => new ProductSales
+                   (p, items) => new ProductSale
                    {
                        ProductId = p.Id,
                        ProductName = p.Name,
@@ -60,7 +61,7 @@ namespace InvoiceManagement.Application.Services
                    })
                .ToListAsync();
 
-            return new ReportData
+            return new Report
             {
                 TotalProducts = totalProducts,
                 TotalProductsSold = totalProductsSold,
