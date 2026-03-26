@@ -1,10 +1,14 @@
 ﻿using Autofac;
 using Autofac.Integration.Mvc;
+using AutoMapper;
+using Invoice_Management.Mappings;
 using InvoiceManagement.Application.Interface;
 using InvoiceManagement.Application.Services;
 using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.UnitOfWork;
+using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 
 namespace Invoice_Management.App_Start
@@ -35,6 +39,35 @@ namespace Invoice_Management.App_Start
             builder.RegisterType<ReportService>()
                   .As<IReportService>()
                   .InstancePerRequest();
+
+            builder.RegisterType<MappingProfile>().As<Profile>();
+
+            // Mapper configuration
+            builder.Register(ctx =>
+            {
+                var profiles = ctx.Resolve<IEnumerable<Profile>>();
+
+                var config = new MapperConfiguration(cfg =>
+                {
+                    foreach (var profile in profiles)
+                    {
+                        cfg.AddProfile(profile);
+                    }
+                });
+
+                return config;
+            })
+            .AsSelf()
+            .SingleInstance();
+
+            // IMapper
+            builder.Register(ctx =>
+            {
+                var config = ctx.Resolve<MapperConfiguration>();
+                return config.CreateMapper();
+            })
+            .As<IMapper>()
+            .InstancePerRequest();
 
             var container = builder.Build();
 

@@ -55,6 +55,9 @@
     <Reference Include="Autofac.Integration.Mvc, Version=6.1.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.Mvc5.6.1.0\lib\net472\Autofac.Integration.Mvc.dll</HintPath>
     </Reference>
+    <Reference Include="AutoMapper, Version=8.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.8.1.1\lib\net461\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -186,21 +189,22 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\InvoiceDataModel.cs" />
-    <Compile Include="Models\ViewModels\CreateProductViewModel.cs" />
-    <Compile Include="Models\ViewModels\CreateUserViewModel.cs" />
-    <Compile Include="Models\ViewModels\EditProductViewModel.cs" />
-    <Compile Include="Models\ViewModels\EditUserViewModel.cs" />
+    <Compile Include="Mappings\MappingProfile.cs" />
+    <Compile Include="Models\ViewModels\InvoiceModel\InvoiceDataViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProductViewModel\CreateProductViewModel.cs" />
+    <Compile Include="Models\ViewModels\UserViewModel\CreateUserViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProductViewModel\EditProductViewModel.cs" />
+    <Compile Include="Models\ViewModels\UserViewModel\EditUserViewModel.cs" />
     <Compile Include="Models\ViewModels\InvoiceModel\InvoiceCreateViewModel.cs" />
     <Compile Include="Models\ViewModels\InvoiceModel\InvoiceDetailsViewModel.cs" />
     <Compile Include="Models\ViewModels\InvoiceModel\InvoiceItemViewModel.cs" />
-    <Compile Include="Models\ViewModels\InvoiceModel\ItemViewModel.cs" />
-    <Compile Include="Models\ViewModels\LoginViewModel.cs" />
-    <Compile Include="Models\ViewModels\ProductDetailsViewModel.cs" />
-    <Compile Include="Models\ViewModels\ProductListViewModel.cs" />
-    <Compile Include="Models\ViewModels\ProductSalesViewModel.cs" />
-    <Compile Include="Models\ViewModels\ReportsViewModel.cs" />
-    <Compile Include="Models\ViewModels\UserListViewModel.cs" />
+    <Compile Include="Models\ViewModels\InvoiceModel\InvoiceViewModel.cs" />
+    <Compile Include="Models\ViewModels\UserViewModel\LoginViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProductViewModel\ProductDetailsViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProductViewModel\ProductViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProductViewModel\ProductSaleViewModel.cs" />
+    <Compile Include="Models\ViewModels\Report\ReportsViewModel.cs" />
+    <Compile Include="Models\ViewModels\UserViewModel\UserListViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -272,6 +276,7 @@
     <Content Include="Views\Invoice\Create.cshtml" />
     <Content Include="Views\Invoice\MyInvoiceDetails.cshtml" />
     <Content Include="Views\Reports\Index.cshtml" />
+    <Content Include="Views\Reports\LowStock.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

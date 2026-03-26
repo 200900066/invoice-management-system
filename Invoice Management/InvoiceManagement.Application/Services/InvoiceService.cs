@@ -168,7 +168,7 @@ namespace InvoiceManagement.Application.Services
             // Decrease return stock
             else if (difference < 0)
             {
-                product.QuantityInStock += difference;
+                product.QuantityInStock += Math.Abs(difference);
             }
         }
 

@@ -1,4 +1,4 @@
-﻿@model Invoice_Management.Models.InvoiceDataModel
+﻿﻿@model Invoice_Management.Models.InvoiceDataViewModel
 
 <div class="container mt-4">
     <div class="card shadow-sm p-4">
@@ -72,7 +72,7 @@
             ProductId = i.ProductId,
             Quantity = i.Quantity,
             UnitPrice = i.UnitPrice,
-            ProductName = i.Product.Name,
+            ProductName = i.ProductName,
             Id = i.Id
         }).ToList()
     ));
@@ -109,7 +109,7 @@
                     <td>
                         <button class="btn btn-danger"
                                 onclick="removeItem(${index})">
-                           Remove 
+                           Remove
                         </button>
                     </td>
                 </tr>
@@ -193,6 +193,8 @@
                 <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
                 <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
                 <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
+                <input type="hidden" name="vm[${index}].ProductName" value="${item.ProductName}" />
+                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.Id}" />
             `;
         });
 

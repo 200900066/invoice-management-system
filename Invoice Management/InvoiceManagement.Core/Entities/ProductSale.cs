@@ -1,6 +1,6 @@
-﻿namespace InvoiceManagement.Application.Services
+﻿namespace InvoiceManagement.Domain.Entities
 {
-    public class ProductSales
+    public class ProductSale
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
