@@ -317,24 +317,6 @@ namespace Invoice_Management.Controllers
             }
         }
 
-        //public async Task<ActionResult> Delete(string id)
-        //{
-        //    if (id == null) return HttpNotFound();
-
-        //    var user = await UserManager.FindByIdAsync(id);
-        //    if (user == null) return HttpNotFound();
-
-        //    var model = new UserViewModel
-        //    {
-        //        Id = user.Id,
-        //        Email = user.Email,
-        //        FullName = user.FirstName + " " + user.LastName,
-        //        PhoneNumber = user.PhoneNumber
-        //    };
-
-        //    return View(model);
-        //}
-
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -368,18 +350,6 @@ namespace Invoice_Management.Controllers
                 return RedirectToAction("Index");
             }
         }
-
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> DeleteConfirmed(string id)
-        //{
-        //    var user = await UserManager.FindByIdAsync(id);
-        //    if (user == null) return HttpNotFound();
-
-        //    await UserManager.DeleteAsync(user);
-
-        //    return RedirectToAction("Index");
-        //}
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
