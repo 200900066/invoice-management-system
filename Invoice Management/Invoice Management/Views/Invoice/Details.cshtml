@@ -64,9 +64,26 @@
         </div>
 
     </div>
+
 </div>
 
-<script>
+@section Scripts {
+
+    <!-- REQUIRED LIBRARIES -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+    // Activate searchable dropdown
+    $(function () {
+        $('#productSelect').select2({
+            placeholder: "Search product...",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+
     let invoiceItems = @Html.Raw(Json.Encode(
         Model.Invoice.Items.Select(i => new {
             ProductId = i.ProductId,
@@ -152,7 +169,9 @@
         }
 
         quantityInput.value = "";
-        select.selectedIndex = 0;
+
+        // Reset Select2 dropdown properly
+        $('#productSelect').val(null).trigger('change');
 
         renderTable();
     }
@@ -181,7 +200,6 @@
         form.method = "post";
         form.action = "/Invoice/Finalize";
 
-        // ✅ ALWAYS send InvoiceId
         form.innerHTML += `
             <input type="hidden" name="invoiceId" value="${invoiceId}" />
         `;
@@ -200,10 +218,7 @@
             });
 
         } else {
-            // ✅ ensures model binding works even if empty
-            form.innerHTML += `
-                <input type="hidden" name="vm" value="" />
-            `;
+            form.innerHTML += `<input type="hidden" name="vm" value="" />`;
         }
 
         document.body.appendChild(form);
@@ -211,4 +226,6 @@
     }
 
     renderTable();
-</script>
+    </script>
+
+}
