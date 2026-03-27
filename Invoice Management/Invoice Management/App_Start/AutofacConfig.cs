@@ -7,6 +7,7 @@ using InvoiceManagement.Application.Services;
 using InvoiceManagement.Infrastructure.Interface;
 using InvoiceManagement.Infrastructure.Persistance;
 using InvoiceManagement.Infrastructure.UnitOfWork;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
@@ -68,6 +69,8 @@ namespace Invoice_Management.App_Start
             })
             .As<IMapper>()
             .InstancePerRequest();
+
+            builder.RegisterInstance(Log.Logger).As<Serilog.ILogger>().SingleInstance();
 
             var container = builder.Build();
 
