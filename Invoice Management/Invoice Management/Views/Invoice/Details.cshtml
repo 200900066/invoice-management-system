@@ -1,4 +1,4 @@
-﻿﻿@model Invoice_Management.Models.InvoiceDataViewModel
+﻿@model Invoice_Management.Models.InvoiceDataViewModel
 
 <div class="container mt-4">
     <div class="card shadow-sm p-4">
@@ -151,7 +151,6 @@
             });
         }
 
-        // reset inputs
         quantityInput.value = "";
         select.selectedIndex = 0;
 
@@ -163,7 +162,7 @@
 
         if (!qty || qty <= 0) {
             alert("Quantity must be greater than 0");
-            renderTable(); // reset invalid input
+            renderTable();
             return;
         }
 
@@ -177,26 +176,35 @@
     }
 
     function finalize() {
-        if (invoiceItems.length === 0) {
-            alert("No items added");
-            return;
-        }
 
         const form = document.createElement("form");
         form.method = "post";
         form.action = "/Invoice/Finalize";
 
-        invoiceItems.forEach((item, index) => {
+        // ✅ ALWAYS send InvoiceId
+        form.innerHTML += `
+            <input type="hidden" name="invoiceId" value="${invoiceId}" />
+        `;
+
+        if (invoiceItems.length > 0) {
+
+            invoiceItems.forEach((item, index) => {
+                form.innerHTML += `
+                    <input type="hidden" name="vm[${index}].Id" value="${item.Id || ''}" />
+                    <input type="hidden" name="vm[${index}].InvoiceId" value="${invoiceId}" />
+                    <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
+                    <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
+                    <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
+                    <input type="hidden" name="vm[${index}].ProductName" value="${item.ProductName}" />
+                `;
+            });
+
+        } else {
+            // ✅ ensures model binding works even if empty
             form.innerHTML += `
-                <input type="hidden" name="vm[${index}].Id" value="${item.Id || ''}" />
-                <input type="hidden" name="vm[${index}].InvoiceId" value="${invoiceId}" />
-                <input type="hidden" name="vm[${index}].ProductId" value="${item.ProductId}" />
-                <input type="hidden" name="vm[${index}].Quantity" value="${item.Quantity}" />
-                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.UnitPrice}" />
-                <input type="hidden" name="vm[${index}].ProductName" value="${item.ProductName}" />
-                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.Id}" />
+                <input type="hidden" name="vm" value="" />
             `;
-        });
+        }
 
         document.body.appendChild(form);
         form.submit();

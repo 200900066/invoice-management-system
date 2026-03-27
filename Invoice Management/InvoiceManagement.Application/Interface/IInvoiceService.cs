@@ -10,7 +10,7 @@ namespace InvoiceManagement.Application.Interface
         Task<Guid> CreateAsync(string userName, string userId);
         Task<Invoice> GetByIdAsync(Guid id);
         Task<IEnumerable<Invoice>> MyAuthorizedInvoices(string userId);
-        Task<Guid> FinalizeAsync(List<InvoiceItem> items);
+        Task<Guid> FinalizeAsync(Guid id, List<InvoiceItem> items);
         Task<Invoice> EditInvoiceAsync(Guid id);
         Task<IEnumerable<Invoice>> ManageInvoice();
     }
