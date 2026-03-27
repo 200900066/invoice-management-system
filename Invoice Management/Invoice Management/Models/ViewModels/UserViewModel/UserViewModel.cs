@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Invoice_Management.Models.ViewModels
+﻿namespace Invoice_Management.Models.ViewModels
 {
-    public class UserListViewModel
+    public class UserViewModel
     {
         public string Id { get; set; }
         public string Email { get; set; }
