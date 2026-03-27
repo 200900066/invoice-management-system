@@ -4,7 +4,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
 <style>
     .invoice-container {
         background: #fff;
@@ -93,11 +92,10 @@
 
     <hr />
 
-    <!-- ADD ITEM -->
     @if (!User.IsInRole("Manager"))
     {
         <div class="product-row">
-            <select id="productSelect">
+            <select id="productSelect" style="width:250px;">
                 <option value="">-- Select Product --</option>
                 @foreach (var p in Model.Products)
                 {
@@ -119,7 +117,6 @@
         </div>
     }
 
-    <!-- TABLE -->
     <table>
         <thead>
             <tr>
@@ -140,128 +137,142 @@
     <form id="finalizeForm" method="post" action="/Invoice/Finalize"></form>
 
     <button type="button" class="btn btn-primary" onclick="finalize()">Finalize Invoice</button>
-
+   
 </div>
 
-<script>
-    let invoiceItems = [];
-    const invoiceId = document.getElementById("invoiceId").value;
+@section Scripts {
 
-    function addItem() {
-        const select = document.getElementById("productSelect");
-        const qtyInput = document.getElementById("quantity");
+    <!-- REQUIRED LIBRARIES -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-        const quantity = parseInt(qtyInput.value);
-        const selectedOption = select.options[select.selectedIndex];
-
-        if (!selectedOption.value) {
-            alert("Select a product");
-            return;
-        }
-
-        if (!quantity || quantity <= 0) {
-            alert("Quantity must be greater than 0");
-            return;
-        }
-
-        const productId = selectedOption.value;
-
-        const existing = invoiceItems.find(i => i.productId == productId);
-
-        if (existing) {
-            existing.quantity += quantity;
-        } else {
-            invoiceItems.push({
-                productId: productId,
-                invoiceId: invoiceId,
-                name: selectedOption.getAttribute("data-name"),
-                unitPrice: parseFloat(selectedOption.getAttribute("data-price")),
-                quantity: quantity
+    <script>
+        // SEARCHABLE DROPDOWN
+        $(function () {
+            $('#productSelect').select2({
+                placeholder: "Search product...",
+                allowClear: true,
+                width: 'resolve'
             });
-        }
-
-        qtyInput.value = 1;
-        select.selectedIndex = 0;
-
-        renderTable();
-    }
-
-    function renderTable() {
-        const tbody = document.getElementById("invoiceItemsBody");
-        tbody.innerHTML = "";
-
-        let total = 0;
-
-        invoiceItems.forEach((item, index) => {
-            const rowTotal = item.quantity * item.unitPrice;
-            total += rowTotal;
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${item.name}</td>
-
-                    <td>
-                        <input type="number"
-                               value="${item.quantity}"
-                               min="1"
-                               oninput="this.value = Math.max(1, this.value)"
-                               onchange="updateQty(${index}, this.value)" />
-                    </td>
-
-                    <td>${item.unitPrice.toFixed(2)}</td>
-                    <td>${rowTotal.toFixed(2)}</td>
-
-                    <td>
-                        <button type="button" class="remove-btn"
-                                onclick="removeItem(${index})">
-                            Remove
-                        </button>
-                    </td>
-                </tr>
-            `;
         });
 
-        document.getElementById("grandTotal").innerText = total.toFixed(2);
-    }
+        let invoiceItems = [];
+        const invoiceId = document.getElementById("invoiceId").value;
 
-    function updateQty(index, value) {
-        const qty = parseInt(value);
+        function addItem() {
+            const select = document.getElementById("productSelect");
+            const qtyInput = document.getElementById("quantity");
 
-        if (!qty || qty <= 0) {
-            alert("Invalid quantity");
+            const quantity = parseInt(qtyInput.value);
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (!selectedOption.value) {
+                alert("Select a product");
+                return;
+            }
+
+            if (!quantity || quantity <= 0) {
+                alert("Quantity must be greater than 0");
+                return;
+            }
+
+            const productId = selectedOption.value;
+
+            const existing = invoiceItems.find(i => i.productId == productId);
+
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                invoiceItems.push({
+                    productId: productId,
+                    invoiceId: invoiceId,
+                    name: selectedOption.getAttribute("data-name"),
+                    unitPrice: parseFloat(selectedOption.getAttribute("data-price")),
+                    quantity: quantity
+                });
+            }
+
+            qtyInput.value = 1;
+
+            // RESET SELECT2
+            $('#productSelect').val(null).trigger('change');
+
             renderTable();
-            return;
         }
 
-        invoiceItems[index].quantity = qty;
-        renderTable();
-    }
+        function renderTable() {
+            const tbody = document.getElementById("invoiceItemsBody");
+            tbody.innerHTML = "";
 
-    function removeItem(index) {
-        invoiceItems.splice(index, 1);
-        renderTable();
-    }
+            let total = 0;
 
-    function finalize() {
-        if (invoiceItems.length === 0) {
-            alert("No items added");
-            return;
+            invoiceItems.forEach((item, index) => {
+                const rowTotal = item.quantity * item.unitPrice;
+                total += rowTotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>
+                            <input type="number"
+                                   value="${item.quantity}"
+                                   min="1"
+                                   onchange="updateQty(${index}, this.value)" />
+                        </td>
+                        <td>${item.unitPrice.toFixed(2)}</td>
+                        <td>${rowTotal.toFixed(2)}</td>
+                        <td>
+                            <button type="button" class="remove-btn"
+                                    onclick="removeItem(${index})">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("grandTotal").innerText = total.toFixed(2);
         }
 
-        const form = document.getElementById("finalizeForm");
-        form.innerHTML = "";
+        function updateQty(index, value) {
+            const qty = parseInt(value);
 
-        invoiceItems.forEach((item, index) => {
-            form.innerHTML += `
-                <input type="hidden" name="vm[${index}].InvoiceId" value="${item.invoiceId}" />
-                <input type="hidden" name="vm[${index}].ProductId" value="${item.productId}" />
-                <input type="hidden" name="vm[${index}].Quantity" value="${item.quantity}" />
-                <input type="hidden" name="vm[${index}].UnitPrice" value="${item.unitPrice}" />
-            `;
-        });
+            if (!qty || qty <= 0) {
+                alert("Invalid quantity");
+                renderTable();
+                return;
+            }
 
-        form.submit();
-    }
+            invoiceItems[index].quantity = qty;
+            renderTable();
+        }
 
-    renderTable();
-</script>
+        function removeItem(index) {
+            invoiceItems.splice(index, 1);
+            renderTable();
+        }
+
+        function finalize() {
+
+            const invoiceId = document.getElementById("invoiceId").value;
+            const form = document.getElementById("finalizeForm");
+            form.innerHTML = "";
+
+            form.innerHTML += `<input type="hidden" name="invoiceId" value="${invoiceId}" />`;
+
+            invoiceItems.forEach((item, index) => {
+                form.innerHTML += `
+            <input type="hidden" name="vm[${index}].InvoiceId" value="${item.invoiceId}" />
+            <input type="hidden" name="vm[${index}].ProductId" value="${item.productId}" />
+            <input type="hidden" name="vm[${index}].Quantity" value="${item.quantity}" />
+            <input type="hidden" name="vm[${index}].UnitPrice" value="${item.unitPrice}" />
+        `;
+            });
+
+            form.submit();
+        }
+
+        renderTable();
+    </script>
+}
