@@ -42,7 +42,7 @@ This will:
 Go to:
 https://localhost:{PORT}/User
 
-Create a users and assign roles (Admin, Manager and User)
+Create a users and assign roles (Admin, Manager and User) each user is set to see some part of the system.
 
 7. Features
 - User CRUD
