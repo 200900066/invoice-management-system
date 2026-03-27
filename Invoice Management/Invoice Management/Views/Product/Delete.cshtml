@@ -4,21 +4,67 @@
     ViewBag.Title = "Delete Product";
 }
 
-<h2>Delete Product</h2>
+<div class="container mt-4">
 
-<h4>Are you sure you want to delete this?</h4>
+    <div class="card shadow-sm border-danger">
 
-<div>
-    <strong>@Model.Name</strong><br />
-    Price: @Model.CostPerItem<br />
-    Stock: @Model.QuantityInStock
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">⚠️ Delete Product</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-warning">
+                Are you sure you want to delete this product? This action cannot be undone.
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Name</div>
+                <div class="col-md-8">@Model.Name</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Price</div>
+                <div class="col-md-8">R @Model.CostPerItem</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Stock</div>
+                <div class="col-md-8">
+                    @if (Model.QuantityInStock == 0)
+                    {
+                        <span class="badge bg-danger">Out of Stock</span>
+                    }
+                    else if (Model.QuantityInStock < 5)
+                    {
+                        <span class="badge bg-warning text-dark">Low Stock (@Model.QuantityInStock)</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">In Stock (@Model.QuantityInStock)</span>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+
+            @using (Html.BeginForm("Delete", "Product", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <button type="submit" class="btn btn-danger">
+                  Delete
+                </button>
+            }
+
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+              Cancel
+            </a>
+
+        </div>
+    </div>
+
 </div>
-
-@using (Html.BeginForm("Delete", "Product", FormMethod.Post))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id)
-
-    <button type="submit" class="btn btn-danger">Delete</button>
-    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary" })
-}

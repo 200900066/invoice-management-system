@@ -201,8 +201,6 @@ namespace Invoice_Management.Controllers
 
                 var vm = _mapper.Map<EditProductViewModel>(product);
 
-                TempData["Warning"] = "You are about to delete this product.";
-
                 return View(vm);
             }
             catch (Exception ex)

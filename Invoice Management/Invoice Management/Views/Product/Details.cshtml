@@ -4,15 +4,54 @@
     ViewBag.Title = "Product Details";
 }
 
-<h2>Product Details</h2>
+<div class="container mt-4">
 
-<div>
-    <strong>Name:</strong> @Model.Name <br />
-    <strong>Price:</strong> @Model.CostPerItem <br />
-    <strong>Stock:</strong> @Model.QuantityInStock
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Product Details</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Name</div>
+                <div class="col-md-8">@Model.Name</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Price</div>
+                <div class="col-md-8">R @Model.CostPerItem</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Stock</div>
+                <div class="col-md-8">
+                    @if (Model.QuantityInStock == 0)
+                    {
+                        <span class="badge bg-danger">Out of Stock</span>
+                    }
+                    else if (Model.QuantityInStock < 5)
+                    {
+                        <span class="badge bg-warning text-dark">Low Stock (@Model.QuantityInStock)</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">In Stock (@Model.QuantityInStock)</span>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
+                Edit
+            </a>
+
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                 Back
+            </a>
+        </div>
+    </div>
+
 </div>
-
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back", "Index")
-</p>
