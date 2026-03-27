@@ -34,56 +34,119 @@ namespace Invoice_Management.Controllers
 
         public async Task<ActionResult> Index()
         {
-            if (User.IsInRole("Manager"))
+            try
             {
-                var allInvoices = await _invoiceService.ManageInvoice();
-                var vm = _mapper.Map<List<InvoiceViewModel>>(allInvoices);
+                List<InvoiceViewModel> vm;
+
+                if (User.IsInRole("Manager"))
+                {
+                    var allInvoices = await _invoiceService.ManageInvoice();
+                    vm = _mapper.Map<List<InvoiceViewModel>>(allInvoices);
+                }
+                else
+                {
+                    var userName = User.Identity.GetUserName();
+                    var invoices = await _invoiceService.MyAuthorizedInvoices(userName);
+                    vm = _mapper.Map<List<InvoiceViewModel>>(invoices);
+
+                }
+
                 return View(vm);
             }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error loading invoices");
 
-            var userName = User.Identity.GetUserName();
-            var invoices = await _invoiceService.MyAuthorizedInvoices(userName);
-            var vmUser = _mapper.Map<List<InvoiceViewModel>>(invoices);
+                TempData["Error"] = "Failed to load invoices";
 
-            return View(vmUser);
+                return View(new List<InvoiceViewModel>());
+            }
         }
 
         public async Task<ActionResult> Create()
         {
-            var userId = User.Identity.GetUserId();
-            var createdByUserName = User.Identity.GetUserName();
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                var createdByUserName = User.Identity.GetUserName();
 
-            var invoiceId = await _invoiceService.CreateAsync(createdByUserName, userId);
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(createdByUserName))
+                {
+                    TempData["Error"] = "User not authenticated properly";
+                    return RedirectToAction("Index");
+                }
 
-            return RedirectToAction("MyInvoiceDetails", new { id = invoiceId });
+                var invoiceId = await _invoiceService.CreateAsync(createdByUserName, userId);
+
+                if (invoiceId == Guid.Empty)
+                {
+                    _logger.Warning($"Invoice creation failed for user {createdByUserName}");
+
+                    TempData["Error"] = "Failed to create invoice";
+                    return RedirectToAction("Index");
+                }
+
+                TempData["Success"] = "Invoice created successfully";
+
+                return RedirectToAction("MyInvoiceDetails", new { id = invoiceId });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error creating invoice");
+
+                TempData["Error"] = "Something went wrong while creating invoice";
+
+                return RedirectToAction("Index");
+            }
         }
 
         [Authorize(Roles = "User,Manager")]
         public async Task<ActionResult> MyInvoiceDetails(Guid id)
         {
-            var invoice = await _invoiceService.GetByIdAsync(id);
-
-            if (invoice == null)
+            try
             {
-                TempData["Error"] = "Invoice not found";
+                var currentUser = User.Identity.GetUserName();
+
+                var invoice = await _invoiceService.GetByIdAsync(id);
+
+                if (invoice == null)
+                {
+                    TempData["Error"] = "Invoice not found";
+                    return RedirectToAction("Index");
+                }
+
+                if (!User.IsInRole("Manager") && invoice.CreatedByUserName != currentUser)
+                {
+                    _logger.Warning($"Unauthorized access attempt by {currentUser} on invoice {id}");
+                    TempData["Error"] = "You are not allowed to view this invoice";
+                    return RedirectToAction("Index");
+                }
+
+                var products = await _productService.GetAllAsync();
+
+                if (products == null)
+                {
+                    _logger.Warning("Product list returned null");
+                    TempData["Error"] = "Failed to load products";
+                    return RedirectToAction("Index");
+                }
+
+                var vm = new InvoiceDataViewModel
+                {
+                    Invoice = _mapper.Map<InvoiceViewModel>(invoice),
+                    Products = _mapper.Map<List<ProductViewModel>>(products)
+                };
+
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Error loading invoice details for ID: {id}");
+
+                TempData["Error"] = "Something went wrong while loading invoice details";
+
                 return RedirectToAction("Index");
             }
-
-            if (!User.IsInRole("Manager") && invoice.CreatedByUserName != User.Identity.GetUserName())
-            {
-                TempData["Error"] = "You are not allowed to view this invoice";
-                return RedirectToAction("Index");
-            }
-
-            var products = await _productService.GetAllAsync();
-
-            var vm = new InvoiceDataViewModel
-            {
-                Invoice = _mapper.Map<InvoiceViewModel>(invoice),
-                Products = _mapper.Map<List<ProductViewModel>>(products)
-            };
-
-            return View(vm);
         }
 
         [HttpPost]
@@ -118,18 +181,61 @@ namespace Invoice_Management.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "User,Manager")]
         public async Task<ActionResult> Details(Guid id)
         {
-            var products = await _productService.GetAllAsync();
-            var invoice = await _invoiceService.GetByIdAsync(id);
-
-            var result = new InvoiceDataViewModel
+            try
             {
-                Invoice = _mapper.Map<InvoiceViewModel>(invoice),
-                Products = _mapper.Map<List<ProductViewModel>>(products)
-            };
+                if (id == Guid.Empty)
+                {
+                    TempData["Error"] = "Invalid invoice ID";
+                    return RedirectToAction("Index");
+                }
 
-            return View(result);
+                var currentUser = User.Identity.GetUserName();
+
+                var invoice = await _invoiceService.GetByIdAsync(id);
+
+                if (invoice == null)
+                {
+                    TempData["Error"] = "Invoice not found";
+                    return RedirectToAction("Index");
+                }
+
+                if (!User.IsInRole("Manager") && invoice.CreatedByUserName != currentUser)
+                {
+                    _logger.Warning($"Unauthorized access attempt by {currentUser} on invoice {id}");
+
+                    TempData["Error"] = "You are not allowed to view this invoice";
+                    return RedirectToAction("Index");
+                }
+
+                var products = await _productService.GetAllAsync();
+
+                if (products == null)
+                {
+                    _logger.Warning("Products returned null");
+
+                    TempData["Error"] = "Failed to load products";
+                    return RedirectToAction("Index");
+                }
+
+                var result = new InvoiceDataViewModel
+                {
+                    Invoice = _mapper.Map<InvoiceViewModel>(invoice),
+                    Products = _mapper.Map<List<ProductViewModel>>(products)
+                };
+
+                return View(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Error loading invoice details for ID: {id}");
+
+                TempData["Error"] = "Something went wrong while loading invoice";
+
+                return RedirectToAction("Index");
+            }
         }
     }
 }
