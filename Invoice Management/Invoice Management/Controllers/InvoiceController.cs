@@ -6,7 +6,6 @@ using InvoiceManagement.Domain.Entities;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -81,30 +80,15 @@ namespace Invoice_Management.Controllers
             return View(vm);
         }
 
-        [Authorize(Roles = "Manager")]
-        public async Task<ActionResult> Manage()
-        {
-            var invoices = await _invoiceService.ManageInvoice();
-
-            var vm = _mapper.Map<List<InvoiceViewModel>>(invoices);
-
-            return View(vm);
-        }
-
         [HttpPost]
-        public async Task<ActionResult> Finalize(List<InvoiceItemViewModel> vm)
+        public async Task<ActionResult> Finalize(Guid invoiceId, List<InvoiceItemViewModel> vm)
         {
-            if (vm == null || !vm.Any())
-            {
-                TempData["Error"] = "No items to save";
-                return RedirectToAction("Index");
-            }
 
             try
             {
                 var dto = _mapper.Map<List<InvoiceItem>>(vm);
 
-                await _invoiceService.FinalizeAsync(dto);
+                await _invoiceService.FinalizeAsync(invoiceId, dto);
 
                 TempData["Success"] = "Invoice saved successfully";
             }

@@ -69,32 +69,54 @@ namespace InvoiceManagement.Application.Services
             return invoices;
         }
 
-
-        public async Task<Guid> FinalizeAsync(List<InvoiceItem> items)
+        public async Task<Guid> FinalizeAsync(Guid id, List<InvoiceItem> items)
         {
-            if (items == null || !items.Any())
-                throw new ArgumentException("Invoice must have items");
-            _unitOfWork.BeginTransaction(); // START TRANSACTION
+            _unitOfWork.BeginTransaction();
 
             try
             {
-                var invoiceId = items.FirstOrDefault().InvoiceId;
-                var invoice = await GetInvoiceOrThrow(invoiceId); // invoice with items
-                var existingItems = invoice.Items.ToList(); // from invoice filter out items
+                var invoice = await GetInvoiceOrThrow(id);
+                var existingItems = invoice.Items.ToList();
 
-                // now items(new items) processing begin
+                items = items?.Where(x => x != null && x.ProductId != 0).ToList();
+
+                // CASE: NO ITEMS  DELETE INVOICE
+                if (items == null || !items.Any())
+                {
+                    foreach (var existing in existingItems)
+                    {
+                        var product = await _unitOfWork
+                            .Repository<Product>()
+                            .GetByIdAsync(existing.ProductId);
+
+                        if (product != null)
+                        {
+                            product.QuantityInStock += existing.Quantity;
+                            await _unitOfWork.Repository<Product>().Update(product);
+                        }
+
+                        _unitOfWork.Repository<InvoiceItem>().Delete(existing);
+                    }
+
+                    _unitOfWork.Repository<Invoice>().Delete(invoice);
+
+                    await _unitOfWork.SaveChangesAsync();
+                    _unitOfWork.Commit();
+
+                    return id;
+                }
                 await ProcessItemsAsync(invoice, items, existingItems);
                 await RemoveDeletedItems(items, existingItems);
                 UpdateInvoiceTotal(invoice);
+
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
 
                 return invoice.Id;
             }
-            catch (Exception ex)
+            catch
             {
                 _unitOfWork.Rollback();
-               
                 throw;
             }
         }
